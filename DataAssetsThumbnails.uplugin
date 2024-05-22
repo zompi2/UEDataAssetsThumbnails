@@ -18,7 +18,7 @@
 		{
 			"Name": "DataAssetsThumbnails",
 			"Type": "Editor",
-			"LoadingPhase": "PreDefault",
+			"LoadingPhase": "PostEngineInit",
 			"PlatformAllowList": [
 				"Win64"
 			]

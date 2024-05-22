@@ -15,4 +15,5 @@ protected:
 
 private:
 
+	FDelegateHandle GetVariableCustomizationInstanceDelegateHandle;
 };

@@ -31,7 +31,8 @@ public class DataAssetsThumbnails : ModuleRules
 				"LevelEditor",
 				"ApplicationCore",
 				"ToolMenus",
-				"AssetTools"
+				"AssetTools",
+				"Kismet"
 			}
 		);
 	}
