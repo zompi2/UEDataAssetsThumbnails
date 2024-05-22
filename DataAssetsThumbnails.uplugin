@@ -1,0 +1,27 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Data Assets Thumbnails",
+	"Description": "Simple tool that displays and sets camera position in editor viewport",
+	"Category": "Misc",
+	"CreatedBy": "Damian Nowakowski",
+	"CreatedByURL": "https://zompidev.blogspot.com",
+	"DocsURL": "https://github.com/zompi2/xxxxxxxxxx",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/xxxxxxxxxx",
+	"SupportURL": "mailto:zompi2@gmail.com",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "DataAssetsThumbnails",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		}
+	]
+}
