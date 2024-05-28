@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class DATAASSETSTHUMBNAILS_API FDataAssetsThumbnailsModule : public IModuleInterface
+class DATAASSETSTHUMBNAILSEDITOR_API FDATEditorModule : public IModuleInterface
 {
 
 protected:
@@ -15,5 +15,5 @@ protected:
 
 private:
 
-	FDelegateHandle GetVariableCustomizationInstanceDelegateHandle;
+	FDelegateHandle OnGetVariableCustomizationInstanceDelegateHandle;
 };

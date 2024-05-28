@@ -17,6 +17,14 @@
 	"Modules": [
 		{
 			"Name": "DataAssetsThumbnails",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "DataAssetsThumbnailsEditor",
 			"Type": "Editor",
 			"LoadingPhase": "PostEngineInit",
 			"PlatformAllowList": [

@@ -1,6 +1,6 @@
 // Copyright (c) 2023 Damian Nowakowski. All rights reserved.
 
-#include "CustomTextureDetails.h"
+#include "DATCustomDetails.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailCategoryBuilder.h"
 #include "IDetailChildrenBuilder.h"
@@ -8,11 +8,14 @@
 #include "IDetailGroup.h"
 #include "BlueprintEditorModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"
+#include "DATSupportedTypes.h"
 
 UE_DISABLE_OPTIMIZATION
 
-TSharedPtr<IDetailCustomization> FCustomTextureDetails::MakeInstance(TSharedPtr<IBlueprintEditor> InBlueprintEditor)
+TSharedPtr<IDetailCustomization> FDATCustomDetails::MakeInstance(TSharedPtr<IBlueprintEditor> InBlueprintEditor)
 {
+	static_assert(TDATSupportedType<UTexture2D>::Value, "Unsupported Type");
+
 	const TArray<UObject*>* Objects = (InBlueprintEditor.IsValid() ? InBlueprintEditor->GetObjectsCurrentlyBeingEdited() : nullptr);
 	if (Objects && Objects->Num() == 1)
 	{
@@ -20,7 +23,7 @@ TSharedPtr<IDetailCustomization> FCustomTextureDetails::MakeInstance(TSharedPtr<
 		{
 			if (Blueprint->ParentClass->IsChildOf<UDataAsset>())
 			{
-				return MakeShareable(new FCustomTextureDetails(InBlueprintEditor, Blueprint));
+				return MakeShareable(new FDATCustomDetails(InBlueprintEditor, Blueprint));
 			}
 		}
 	}
@@ -29,7 +32,7 @@ TSharedPtr<IDetailCustomization> FCustomTextureDetails::MakeInstance(TSharedPtr<
 }
 
 // IDetailCustomization interface
-void FCustomTextureDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
+void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
 	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
 	DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);

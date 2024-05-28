@@ -1,6 +1,6 @@
 Opcje per asset
 - prawidłowo zapamiętywać metatag HasThumbnail i na podstawie jego zmian decydować czy custom thumbnail powinien być czyszczony czy nie
-- ograniczyć działanie dla Texture2D i MaterialInterface
+- ograniczyć działanie dla Texture2D i MaterialInterface (custom details dać w template'a)
 
 Opcje dla content browsera
 - dać opcję odświeżenia wszystkich assetów
@@ -8,3 +8,7 @@ Opcje dla content browsera
 Opcje globalne
 - dać opcje wyświetlania defaultowych ikon (wybranych przez usera) w zależności od klasy
 - dać opcję wyświetlania małej ikonki w rogu w celu lepszej identyfikacji assetu (albo jakaś defautlowa albo ustawiona przez usera)
+
+Opcje użytkowe
+- dać w module projektu jakieś defaultowe dataassety i primary dataassety z teksturami do ustawienia
+

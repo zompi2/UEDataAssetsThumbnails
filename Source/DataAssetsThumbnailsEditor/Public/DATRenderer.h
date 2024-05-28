@@ -3,10 +3,10 @@
 #pragma once
 
 #include "ThumbnailRendering/TextureThumbnailRenderer.h"
-#include "DataAssetsThumbnailsRenderer.generated.h"
+#include "DATRenderer.generated.h"
 
 UCLASS()
-class DATAASSETSTHUMBNAILS_API UDataAssetsThumbnailsRenderer : public UThumbnailRenderer
+class DATAASSETSTHUMBNAILSEDITOR_API UDATRenderer : public UThumbnailRenderer
 {
 	GENERATED_BODY()
 

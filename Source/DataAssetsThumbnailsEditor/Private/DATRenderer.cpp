@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "DataAssetsThumbnailsRenderer.h"
+#include "DATRenderer.h"
 #include "Engine/Texture2D.h"
 #include "UnrealClient.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
@@ -8,7 +8,7 @@
 
 UE_DISABLE_OPTIMIZATION
 
-bool UDataAssetsThumbnailsRenderer::CanVisualizeAsset(UObject* Object)
+bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 {	
 	if (bThumbnailLock)
 	{
@@ -35,7 +35,7 @@ bool UDataAssetsThumbnailsRenderer::CanVisualizeAsset(UObject* Object)
 	return bResult;
 }
 
-void UDataAssetsThumbnailsRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const
+void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const
 {
 	if (UObject* ThumbnailObject = GetObject(Object))
 	{
@@ -50,7 +50,7 @@ void UDataAssetsThumbnailsRenderer::GetThumbnailSize(UObject* Object, float Zoom
 	OutHeight = 256;
 }
 
-void UDataAssetsThumbnailsRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
+void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
 	if (UObject* ThumbnailObject = GetObject(Object))
 	{
@@ -72,12 +72,12 @@ void UDataAssetsThumbnailsRenderer::Draw(UObject* Object, int32 X, int32 Y, uint
 	}
 }
 
-EThumbnailRenderFrequency UDataAssetsThumbnailsRenderer::GetThumbnailRenderFrequency(UObject* Object) const
+EThumbnailRenderFrequency UDATRenderer::GetThumbnailRenderFrequency(UObject* Object) const
 {
 	return EThumbnailRenderFrequency::OnPropertyChange;
 }
 
-UObject* UDataAssetsThumbnailsRenderer::GetObject(UObject* Object) const
+UObject* UDATRenderer::GetObject(UObject* Object) const
 {
 	if (UDataAsset* DataAsset = Cast<UDataAsset>(Object))
 	{
@@ -113,7 +113,7 @@ UObject* UDataAssetsThumbnailsRenderer::GetObject(UObject* Object) const
 	return nullptr;
 }
 
-UThumbnailRenderer* UDataAssetsThumbnailsRenderer::GetRenderer(UObject* Object) const
+UThumbnailRenderer* UDATRenderer::GetRenderer(UObject* Object) const
 {
 	if (FThumbnailRenderingInfo* Info = UThumbnailManager::Get().GetRenderingInfo(Object))
 	{

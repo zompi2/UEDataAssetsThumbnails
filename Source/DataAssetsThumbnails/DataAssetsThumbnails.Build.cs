@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Damian Nowakowski. All rights reserved.
+// Copyright (c) 2024 Damian Nowakowski. All rights reserved.
 
 using UnrealBuildTool;
 
@@ -6,34 +6,17 @@ public class DataAssetsThumbnails : ModuleRules
 {
 	public DataAssetsThumbnails(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        // To ensure IWYU
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PrivateIncludePaths.Add("DataAssetsThumbnails/Private");
-
-		PublicDependencyModuleNames.AddRange(
+        // Required modules
+        PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
-				"InputCore"
-			}
-		);
-		
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-                "Engine",
 				"CoreUObject",
-                "Slate",
-                "SlateCore",
-                "UnrealEd",
-				"EditorStyle",
-				"Projects",
-				"LevelEditor",
-				"ApplicationCore",
-				"ToolMenus",
-				"AssetTools",
-				"Kismet"
+				"Engine"
 			}
 		);
-	}
+    }
 }
