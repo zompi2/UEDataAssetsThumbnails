@@ -5,27 +5,40 @@
 #include "DetailCategoryBuilder.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
+#include "DetailLayoutBuilder.h"
 #include "IDetailGroup.h"
 #include "BlueprintEditorModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"
-#include "DATSupportedTypes.h"
 
 UE_DISABLE_OPTIMIZATION
 
+FDATCustomDetails::FDATCustomDetails(UBlueprint* InBlueprintPtr) 
+: BlueprintPtr(InBlueprintPtr)
+{
+}
+
 TSharedPtr<IDetailCustomization> FDATCustomDetails::MakeInstance(TSharedPtr<IBlueprintEditor> InBlueprintEditor)
 {
-	static_assert(TDATSupportedType<UTexture2D>::Value, "Unsupported Type");
-
-	const TArray<UObject*>* Objects = (InBlueprintEditor.IsValid() ? InBlueprintEditor->GetObjectsCurrentlyBeingEdited() : nullptr);
-	if (Objects && Objects->Num() == 1)
+	if (InBlueprintEditor.IsValid() == false)
 	{
-		if (UBlueprint* Blueprint = Cast<UBlueprint>((*Objects)[0]))
-		{
-			if (Blueprint->ParentClass->IsChildOf<UDataAsset>())
-			{
-				return MakeShareable(new FDATCustomDetails(InBlueprintEditor, Blueprint));
-			}
-		}
+		return nullptr;
+	}
+
+	const TArray<UObject*>* Objects = InBlueprintEditor->GetObjectsCurrentlyBeingEdited();
+	if (Objects == nullptr || Objects->Num() != 1)
+	{
+		return nullptr;
+	}
+
+	UBlueprint* Blueprint = Cast<UBlueprint>((*Objects)[0]);
+	if (Blueprint == nullptr)
+	{
+		return nullptr;
+	}
+	
+	if (Blueprint->ParentClass && Blueprint->ParentClass->IsChildOf<UDataAsset>())
+	{
+		return MakeShareable(new FDATCustomDetails(Blueprint));
 	}
 
 	return nullptr;
@@ -34,76 +47,108 @@ TSharedPtr<IDetailCustomization> FDATCustomDetails::MakeInstance(TSharedPtr<IBlu
 // IDetailCustomization interface
 void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
+	FProperty* Property = GetSupportedCustomizableProperty(DetailLayout);
+	if (Property == nullptr)
+	{
+		return;
+	}
+
+	const FName PropertyName = Property->GetFName();
+
+	DetailLayout.EditCategory("Variable")
+		.AddCustomRow(INVTEXT("Hello"))
+		.NameContent()
+		[
+			SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
+			.AutoWidth()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			[
+				SNew(STextBlock)
+				.Font(IDetailLayoutBuilder::GetDetailFont())
+				.Text(INVTEXT("Is Thumbnail"))
+				.ToolTipText(INVTEXT("Some Tooltip"))
+			]
+		]
+		.ValueContent()
+		[
+			SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
+			.AutoWidth()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			[
+				SNew(SCheckBox)
+				.ToolTipText(INVTEXT("Some Tooltip"))
+				.IsChecked_Lambda([this, PropertyName]() -> ECheckBoxState
+				{
+					FString TmpResult;
+					const bool bResult = FBlueprintEditorUtils::GetBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, "Thumbnail", TmpResult);
+					return bResult ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+				})
+				.OnCheckStateChanged_Lambda([this, PropertyName](ECheckBoxState NewState) -> void
+				{
+					if (NewState == ECheckBoxState::Checked)
+					{
+						FBlueprintEditorUtils::SetBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, "Thumbnail", "");
+						BlueprintPtr->Modify();
+					}
+					if (NewState == ECheckBoxState::Unchecked)
+					{
+						FBlueprintEditorUtils::RemoveBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, "Thumbnail");
+						BlueprintPtr->Modify();
+					}
+				})
+			]
+		];
+}
+
+FObjectProperty* FDATCustomDetails::GetSupportedCustomizableProperty(IDetailLayoutBuilder& DetailLayout)
+{
 	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
 	DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);
-	if (ObjectsBeingCustomized.Num() == 1)
+	if (ObjectsBeingCustomized.Num() != 1)
 	{
-		UPropertyWrapper* PropertyWrapper = Cast<UPropertyWrapper>(ObjectsBeingCustomized[0].Get());
-		const TWeakFieldPtr<FProperty> PropertyBeingCustomized = PropertyWrapper ? PropertyWrapper->GetProperty() : nullptr;
-		if (PropertyBeingCustomized.IsValid())
-		{
-			FProperty* Property = PropertyBeingCustomized.Get();
-			
-			if (Property)
-			{
-				if (Property->GetClass()->IsChildOf(FObjectProperty::StaticClass()))
-				{
-					FObjectProperty* ObjectProperty = static_cast<FObjectProperty*>(Property);
-					const FName varName = PropertyBeingCustomized->GetFName();
+		return nullptr;
+	}
+	UPropertyWrapper* PropertyWrapper = Cast<UPropertyWrapper>(ObjectsBeingCustomized[0].Get());
+	if (PropertyWrapper == nullptr)
+	{
+		return nullptr;
+	}
 
-					if (ObjectProperty->PropertyClass->IsChildOf<UTexture2D>())
-					{
-						DetailLayout.EditCategory("Variable")
-						.AddCustomRow(INVTEXT("Hello"))
-						.NameContent()
-						[
-							SNew(SHorizontalBox)
-							+ SHorizontalBox::Slot()
-							.AutoWidth()
-							.HAlign(HAlign_Fill)
-							.VAlign(VAlign_Fill)
-							[
-								SNew(STextBlock)
-								.Text(INVTEXT("Is Thumbnail"))
-							]
-						]
-						.ValueContent()
-						[
-							SNew(SHorizontalBox)
-							+SHorizontalBox::Slot()
-							.AutoWidth()
-							.HAlign(HAlign_Fill)
-							.VAlign(VAlign_Fill)
-							[
-								SNew(SCheckBox)
-								.IsChecked_Lambda([this, ObjectProperty, varName]() -> ECheckBoxState
-								{
-									FString tmp;
-									bool bResult = FBlueprintEditorUtils::GetBlueprintVariableMetaData(BlueprintPtr.Get(), varName, nullptr, "Thumbnail", tmp);
-									return bResult ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-								})
-								.OnCheckStateChanged_Lambda([this, ObjectProperty, varName](ECheckBoxState NewState) -> void
-								{
-									if (NewState == ECheckBoxState::Checked)
-									{
-										FBlueprintEditorUtils::SetBlueprintVariableMetaData(BlueprintPtr.Get(), varName, nullptr, "Thumbnail", "");
-										//ObjectProperty->SetMetaData("Thumbnail", "");
-										BlueprintPtr->Modify();
-									}
-									if (NewState == ECheckBoxState::Unchecked)
-									{
-										FBlueprintEditorUtils::RemoveBlueprintVariableMetaData(BlueprintPtr.Get(), varName, nullptr, "Thumbnail");
-										//ObjectProperty->RemoveMetaData("Thumbnail");
-										BlueprintPtr->Modify();
-									}
-								})
-							]
-						];
-					}
-				}
-			}
+	const TWeakFieldPtr<FProperty> PropertyBeingCustomized = PropertyWrapper ? PropertyWrapper->GetProperty() : nullptr;
+	FProperty* Property = PropertyBeingCustomized.IsValid() ? PropertyBeingCustomized.Get() : nullptr;
+	if (Property == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (Property->GetClass()->IsChildOf(FObjectProperty::StaticClass()) == false)
+	{
+		return nullptr;
+	}
+	
+	FObjectProperty* ObjectProperty = static_cast<FObjectProperty*>(Property);
+	if (ObjectProperty == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (ObjectProperty->PropertyClass)
+	{
+		if (ObjectProperty->PropertyClass->IsChildOf<UTexture2D>())
+		{
+			return ObjectProperty;
+		}
+		if (ObjectProperty->PropertyClass->IsChildOf<UMaterialInterface>())
+		{
+			return ObjectProperty;
 		}
 	}
+
+	return nullptr;
 }
 
 UE_ENABLE_OPTIMIZATION

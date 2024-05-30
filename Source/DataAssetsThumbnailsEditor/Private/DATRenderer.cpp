@@ -81,24 +81,33 @@ UObject* UDATRenderer::GetObject(UObject* Object) const
 {
 	if (UDataAsset* DataAsset = Cast<UDataAsset>(Object))
 	{
-		for (TFieldIterator<FProperty> Property(DataAsset->GetClass()); Property; ++Property)
+		for (TFieldIterator<FProperty> PropertyIt(DataAsset->GetClass()); PropertyIt; ++PropertyIt)
 		{
+			FProperty* Property = *PropertyIt;
 			if (Property->HasMetaData("Thumbnail"))
 			{
 				if (Property->GetClass()->IsChildOf(FObjectProperty::StaticClass()))
 				{
-					TObjectPtr<UObject> ThumbObject = FObjectProperty::GetPropertyValue(Property->ContainerPtrToValuePtr<void>(DataAsset));
-					if (ThumbObject)
+					FObjectProperty* ObjectProperty = static_cast<FObjectProperty*>(Property);
+					if (ObjectProperty)
 					{
-						if (UPackage* Pck = Object->GetPackage())
+						if (ObjectProperty->PropertyClass && ObjectProperty->PropertyClass->IsChildOf<UTexture2D>())
 						{
-							if (UMetaData* Meta = Pck->GetMetaData())
+							TObjectPtr<UObject> ThumbObject = FObjectProperty::GetPropertyValue(ObjectProperty->ContainerPtrToValuePtr<void>(DataAsset));
+							if (ThumbObject)
 							{
-								Meta->SetValue(DataAsset, "HasThumbnail", TEXT("true"));
+								if (UPackage* Pck = Object->GetPackage())
+								{
+									if (UMetaData* Meta = Pck->GetMetaData())
+									{
+										Meta->SetValue(DataAsset, "HasThumbnail", TEXT("true"));
+									}
+								}
+								return ThumbObject;
 							}
 						}
-						return ThumbObject;
 					}
+					
 				}
 			}
 		}
