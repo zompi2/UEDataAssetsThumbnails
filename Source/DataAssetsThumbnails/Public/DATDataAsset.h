@@ -15,7 +15,7 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Thumbnail))
-	TObjectPtr<class UTexture2D> ThumbnailIcon = nullptr;
+	TSoftObjectPtr<class UTexture2D> ThumbnailIcon = nullptr;
 #endif
 };
 

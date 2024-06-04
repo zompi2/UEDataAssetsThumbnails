@@ -9,6 +9,7 @@
 #include "IDetailGroup.h"
 #include "BlueprintEditorModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"
+#include "DATUtils.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -104,7 +105,7 @@ void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 		];
 }
 
-FObjectProperty* FDATCustomDetails::GetSupportedCustomizableProperty(IDetailLayoutBuilder& DetailLayout)
+FProperty* FDATCustomDetails::GetSupportedCustomizableProperty(IDetailLayoutBuilder& DetailLayout)
 {
 	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
 	DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);
@@ -120,35 +121,13 @@ FObjectProperty* FDATCustomDetails::GetSupportedCustomizableProperty(IDetailLayo
 
 	const TWeakFieldPtr<FProperty> PropertyBeingCustomized = PropertyWrapper ? PropertyWrapper->GetProperty() : nullptr;
 	FProperty* Property = PropertyBeingCustomized.IsValid() ? PropertyBeingCustomized.Get() : nullptr;
-	if (Property == nullptr)
+
+	if (FDATUtils::IsPropertySupported(Property) == false)
 	{
 		return nullptr;
 	}
 
-	if (Property->GetClass()->IsChildOf(FObjectProperty::StaticClass()) == false)
-	{
-		return nullptr;
-	}
-	
-	FObjectProperty* ObjectProperty = static_cast<FObjectProperty*>(Property);
-	if (ObjectProperty == nullptr)
-	{
-		return nullptr;
-	}
-
-	if (ObjectProperty->PropertyClass)
-	{
-		if (ObjectProperty->PropertyClass->IsChildOf<UTexture2D>())
-		{
-			return ObjectProperty;
-		}
-		if (ObjectProperty->PropertyClass->IsChildOf<UMaterialInterface>())
-		{
-			return ObjectProperty;
-		}
-	}
-
-	return nullptr;
+	return Property;
 }
 
 UE_ENABLE_OPTIMIZATION

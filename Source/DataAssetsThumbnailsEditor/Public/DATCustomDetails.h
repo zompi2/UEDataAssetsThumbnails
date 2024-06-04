@@ -19,7 +19,7 @@ public:
 	// IDetailCustomization interface
 	void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
 
-	FObjectProperty* GetSupportedCustomizableProperty(class IDetailLayoutBuilder& DetailLayout);
+	FProperty* GetSupportedCustomizableProperty(class IDetailLayoutBuilder& DetailLayout);
 
 	/** The blueprint we are editing */
 	TWeakObjectPtr<UBlueprint> BlueprintPtr;

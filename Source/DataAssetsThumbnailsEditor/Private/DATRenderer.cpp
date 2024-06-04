@@ -5,6 +5,7 @@
 #include "UnrealClient.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "AssetViewUtils.h"
+#include "DATUtils.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -17,18 +18,27 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 	bThumbnailLock = true;
 
 	bool bResult = false;
-	if (GetObject(Object) == nullptr)
+
+	const bool bHasThumbnailMetaData = GetHasThumbnailMetaData(Object);
+	
+	UObject* AssetToVisualize = GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
+	if (AssetToVisualize == nullptr)
 	{
-		bResult = false;
-		if (AssetViewUtils::AssetHasCustomThumbnail(FAssetData(Object)))
-		{
-			AssetViewUtils::ClearCustomThumbnails({ FAssetData(Object) });
-		}
+		FSoftObjectPtr AssetToVisualizeSoft = GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
-	else
+
+	if (bHasThumbnailMetaData && (AssetToVisualize == nullptr))
 	{
-		bResult = true;
+		AssetViewUtils::ClearCustomThumbnails({ FAssetData(Object) });
+		SetHasThumbnailMetaData(Object, false);
 	}
+	else if ((bHasThumbnailMetaData == false) && (AssetToVisualize != nullptr))
+	{
+		SetHasThumbnailMetaData(Object, true);
+	}
+
+	bResult = (AssetToVisualize != nullptr);
 
 	bThumbnailLock = false;
 	
@@ -37,39 +47,51 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 
 void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const
 {
-	if (UObject* ThumbnailObject = GetObject(Object))
-	{
-		if (UThumbnailRenderer* Renderer = GetRenderer(ThumbnailObject))
-		{
-			Renderer->GetThumbnailSize(ThumbnailObject, Zoom, OutWidth, OutHeight);
-			return;
-		}
-	}
-
 	OutWidth = 256;
 	OutHeight = 256;
+
+	UObject* AssetToVisualize = GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
+	if (AssetToVisualize == nullptr)
+	{
+		FSoftObjectPtr AssetToVisualizeSoft = GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
+	}
+
+	if (AssetToVisualize == nullptr)
+	{
+		return;
+	}
+
+	UThumbnailRenderer* Renderer = GetThumbnailRenderer(AssetToVisualize);
+	if (Renderer == nullptr)
+	{
+		return;
+	}
+
+	Renderer->GetThumbnailSize(AssetToVisualize, Zoom, OutWidth, OutHeight);
 }
 
 void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
-	if (UObject* ThumbnailObject = GetObject(Object))
+	UObject* AssetToVisualize = GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
+	if (AssetToVisualize == nullptr)
 	{
-		if (ThumbnailObject->IsA<UDataAsset>())
-		{
-			
-		}
-		else
-		{
-			if (UThumbnailRenderer* Renderer = GetRenderer(ThumbnailObject))
-			{
-				Renderer->Draw(ThumbnailObject, X, Y, Width, Height, Viewport, Canvas, bAdditionalViewFamily);
-			}
-		}
+		FSoftObjectPtr AssetToVisualizeSoft = GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
-	else
+
+	if (AssetToVisualize == nullptr)
 	{
-		//AssetViewUtils::ClearCustomThumbnails({FAssetData(Object)});
+		return;
 	}
+
+	UThumbnailRenderer* Renderer = GetThumbnailRenderer(AssetToVisualize);
+	if (Renderer == nullptr)
+	{
+		return;
+	}
+
+	Renderer->Draw(AssetToVisualize, X, Y, Width, Height, Viewport, Canvas, bAdditionalViewFamily);
 }
 
 EThumbnailRenderFrequency UDATRenderer::GetThumbnailRenderFrequency(UObject* Object) const
@@ -77,52 +99,66 @@ EThumbnailRenderFrequency UDATRenderer::GetThumbnailRenderFrequency(UObject* Obj
 	return EThumbnailRenderFrequency::OnPropertyChange;
 }
 
-UObject* UDATRenderer::GetObject(UObject* Object) const
+bool UDATRenderer::GetHasThumbnailMetaData(UObject* Object) const
 {
-	if (UDataAsset* DataAsset = Cast<UDataAsset>(Object))
+	if (Object == nullptr)
 	{
-		for (TFieldIterator<FProperty> PropertyIt(DataAsset->GetClass()); PropertyIt; ++PropertyIt)
-		{
-			FProperty* Property = *PropertyIt;
-			if (Property->HasMetaData("Thumbnail"))
-			{
-				if (Property->GetClass()->IsChildOf(FObjectProperty::StaticClass()))
-				{
-					FObjectProperty* ObjectProperty = static_cast<FObjectProperty*>(Property);
-					if (ObjectProperty)
-					{
-						if (ObjectProperty->PropertyClass && ObjectProperty->PropertyClass->IsChildOf<UTexture2D>())
-						{
-							TObjectPtr<UObject> ThumbObject = FObjectProperty::GetPropertyValue(ObjectProperty->ContainerPtrToValuePtr<void>(DataAsset));
-							if (ThumbObject)
-							{
-								if (UPackage* Pck = Object->GetPackage())
-								{
-									if (UMetaData* Meta = Pck->GetMetaData())
-									{
-										Meta->SetValue(DataAsset, "HasThumbnail", TEXT("true"));
-									}
-								}
-								return ThumbObject;
-							}
-						}
-					}
-					
-				}
-			}
-		}
-		if (UPackage* Pck = Object->GetPackage())
-		{
-			if (UMetaData* Meta = Pck->GetMetaData())
-			{
-				Meta->SetValue(DataAsset, "HasThumbnail", TEXT("false"));
-			}
-		}
+		return false;
 	}
-	return nullptr;
+
+	UPackage* Package = Object->GetPackage();
+	if (Package == nullptr)
+	{
+		return false;
+	}
+
+	UMetaData* MetaData = Package->GetMetaData();
+	if (MetaData == nullptr)
+	{
+		return false;
+	}
+
+	const FString& HasThumbnailMetaValue = MetaData->GetValue(Object, DAT::HasThumbnailTag);
+	if (HasThumbnailMetaValue == TEXT("true"))
+	{
+		return true;
+	}
+
+	return false;
 }
 
-UThumbnailRenderer* UDATRenderer::GetRenderer(UObject* Object) const
+void UDATRenderer::SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail)
+{
+	if (Object == nullptr)
+	{
+		return;
+	}
+
+	UPackage* Package = Object->GetPackage();
+	if (Package == nullptr)
+	{
+		return;
+	}
+
+	UMetaData* MetaData = Package->GetMetaData();
+	if (MetaData == nullptr)
+	{
+		return;
+	}
+
+	if (bHasThumbnail)
+	{
+		MetaData->SetValue(Object, DAT::HasThumbnailTag, TEXT("true"));
+	}
+	else
+	{
+		MetaData->RemoveValue(Object, DAT::HasThumbnailTag);
+	}
+
+	Object->Modify();
+}
+
+UThumbnailRenderer* UDATRenderer::GetThumbnailRenderer(UObject* Object) const
 {
 	if (FThumbnailRenderingInfo* Info = UThumbnailManager::Get().GetRenderingInfo(Object))
 	{
