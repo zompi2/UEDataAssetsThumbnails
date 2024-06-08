@@ -14,6 +14,9 @@ protected:
 	void ShutdownModule() override;
 
 private:
-
+	
+	void RegisterMenus();
+	void RefreshThumbnails(const TArray<FAssetData>& SelectedAssets);
+	void RefreshThumbnailsInFolders(const TArray<FString>& SelectedPaths);
 	FDelegateHandle OnGetVariableCustomizationInstanceDelegateHandle;
 };

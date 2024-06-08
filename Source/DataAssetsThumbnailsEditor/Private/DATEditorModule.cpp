@@ -5,6 +5,7 @@
 #include "DATRenderer.h"
 #include "DATCustomDetails.h"
 #include "BlueprintEditorModule.h"
+#include "ContentBrowserMenuContexts.h"
 
 IMPLEMENT_GAME_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
@@ -18,6 +19,9 @@ void FDATEditorModule::StartupModule()
     // Register custom details
     FBlueprintEditorModule& BlueprintEditorModule = FModuleManager::LoadModuleChecked<FBlueprintEditorModule>("Kismet");
     OnGetVariableCustomizationInstanceDelegateHandle = BlueprintEditorModule.RegisterVariableCustomization(FProperty::StaticClass(), FOnGetVariableCustomizationInstance::CreateStatic(&FDATCustomDetails::MakeInstance));
+
+    // Register options for refreshing data asset thumbnails
+    UToolMenus::Get()->RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FDATEditorModule::RegisterMenus));
 }
 
 void FDATEditorModule::ShutdownModule()
@@ -38,6 +42,76 @@ void FDATEditorModule::ShutdownModule()
         BlueprintEditorModule->UnregisterVariableCustomization(FProperty::StaticClass(), OnGetVariableCustomizationInstanceDelegateHandle);
 
     }
+
+    // remove menu extension
+    UToolMenus::UnregisterOwner(this);
+}
+
+// Check DataValidationModule.cpp for references
+void FDATEditorModule::RegisterMenus()
+{
+    FToolMenuOwnerScoped OwnerScoped(this);
+
+    {
+        UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.AssetActionsSubMenu");
+        FToolMenuSection& Section = Menu->FindOrAddSection("AssetContextAdvancedActions");
+
+        FToolUIAction Action;
+        Action.ExecuteAction = FToolMenuExecuteAction::CreateLambda([this](const FToolMenuContext& InContext)
+        {
+            if (const UContentBrowserAssetContextMenuContext* Context = InContext.FindContext<UContentBrowserAssetContextMenuContext>())
+            {
+                RefreshThumbnails(Context->SelectedAssets);
+            }
+        });
+        Action.IsActionVisibleDelegate = FToolMenuIsActionButtonVisible::CreateLambda([](const FToolMenuContext& InContext)
+        {
+            if (const UContentBrowserAssetContextMenuContext* Context = InContext.FindContext<UContentBrowserAssetContextMenuContext>())
+            {
+                if (Context->CommonClass->IsChildOf(UDataAsset::StaticClass()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        Section.AddMenuEntry(
+            "RefreshThumbnails",
+            INVTEXT("Refresh Thumbnails"),
+            INVTEXT("Refresh Thumbnails on these assets"),
+            FSlateIcon(),
+            Action
+        );
+    }
+
+    {
+        UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.FolderContextMenu");
+        FToolMenuSection& Section = Menu->FindOrAddSection("PathContextBulkOperations");
+        Section.AddMenuEntry(
+            "RefreshThumbnailsPath",
+            INVTEXT("Refresh Thumbnails"),
+            INVTEXT("Refresh Thumbnails on assets in this directory"),
+            FSlateIcon(),
+            FToolMenuExecuteAction::CreateLambda([this](const FToolMenuContext& InContext)
+            {
+                if (const UContentBrowserFolderContext* Context = InContext.FindContext<UContentBrowserFolderContext>())
+                {
+                    RefreshThumbnailsInFolders(Context->GetSelectedPackagePaths());
+                }
+            })
+        );
+    }
+}
+
+void FDATEditorModule::RefreshThumbnails(const TArray<FAssetData>& SelectedAssets)
+{
+
+}
+
+void FDATEditorModule::RefreshThumbnailsInFolders(const TArray<FString>& SelectedPaths)
+{
+
 }
 
 UE_ENABLE_OPTIMIZATION

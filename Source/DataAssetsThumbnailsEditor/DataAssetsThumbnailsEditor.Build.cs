@@ -32,7 +32,8 @@ public class DataAssetsThumbnailsEditor : ModuleRules
 				"ApplicationCore",
 				"ToolMenus",
 				"AssetTools",
-				"Kismet"
+				"Kismet",
+				"ContentBrowser"
 			}
 		);
 	}
