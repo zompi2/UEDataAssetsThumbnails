@@ -1,5 +1,3 @@
-REFAKTOR: Uporządkować bałagan z template'ami
-
 Opcje dla content browsera
 - dać opcję odświeżenia wszystkich assetów
 
