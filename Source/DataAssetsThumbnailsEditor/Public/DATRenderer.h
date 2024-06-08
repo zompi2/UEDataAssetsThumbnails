@@ -6,12 +6,6 @@
 #include "DATUtils.h"
 #include "DATRenderer.generated.h"
 
-namespace DAT
-{
-	const FName& ThumbnailTag = "Thumbnail";
-	const FName& HasThumbnailTag = "HasThumbnail";
-}
-
 UCLASS()
 class DATAASSETSTHUMBNAILSEDITOR_API UDATRenderer : public UThumbnailRenderer
 {
@@ -26,59 +20,7 @@ public:
 
 protected:
 	
-	template<typename T>
-	T* FindSupportedThumbnailObjectProperty(UObject* Object) const
-	{
-		UDataAsset* DataAsset = Cast<UDataAsset>(Object);
-		if (DataAsset == nullptr)
-		{
-			return nullptr;
-		}
-
-		for (TFieldIterator<FProperty> PropertyIt(DataAsset->GetClass()); PropertyIt; ++PropertyIt)
-		{
-			FProperty* Property = *PropertyIt;
-			if (Property == nullptr) [[unlikely]]
-			{
-				continue;
-			}
-
-			if (Property->HasMetaData(DAT::ThumbnailTag) == false)
-			{
-				continue;
-			}
-
-			T* ObjectProperty = FDATUtils::CastPropertyToSupportedObjectProperty<T>(Property);
-			if (ObjectProperty)
-			{
-				return ObjectProperty;
-			}
-		}
-
-		return nullptr;
-	}
-
-	template<typename T, typename R>
-	R GetSupportedObjectFromObjectProperty(T* ObjectProperty, UObject* ContainerObject) const
-	{
-		if (ObjectProperty == nullptr)
-		{
-			return {};
-		}
-
-		if (ContainerObject == nullptr)
-		{
-			return {};
-		}
-
-		return T::GetPropertyValue(ObjectProperty->ContainerPtrToValuePtr<void>(ContainerObject));
-	}
-
-	template<typename T, typename R>
-	R GetSupportedObjectFromObject(UObject* Object) const
-	{
-		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object), Object);
-	}
+	UObject* GetAssetToVisualizeFromObject(const UObject* Object) const;
 
 private: 
 

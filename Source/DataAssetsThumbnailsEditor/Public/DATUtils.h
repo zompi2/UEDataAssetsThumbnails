@@ -3,10 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-template<typename T> struct TSupportedPropertyCast { enum { Value = false }; };
-template<> struct TSupportedPropertyCast<FObjectProperty> { enum { Value = true }; };
-template<> struct TSupportedPropertyCast<FSoftObjectProperty> { enum { Value = true }; };
+#include "DATTraits.h"
+#include "DATTypes.h"
 
 class DATAASSETSTHUMBNAILSEDITOR_API FDATUtils
 {
@@ -74,4 +72,59 @@ public:
 		return false;
 	}
 
+	template<typename T>
+	static T* FindSupportedThumbnailObjectProperty(const UObject* Object)
+	{
+		const UDataAsset* DataAsset = Cast<UDataAsset>(Object);
+		if (DataAsset == nullptr)
+		{
+			return nullptr;
+		}
+
+		for (TFieldIterator<FProperty> PropertyIt(DataAsset->GetClass()); PropertyIt; ++PropertyIt)
+		{
+			FProperty* Property = *PropertyIt;
+			if (Property == nullptr) [[unlikely]]
+			{
+				continue;
+			}
+
+			if (Property->HasMetaData(DAT::ThumbnailTag) == false)
+			{
+				continue;
+			}
+
+			T* ObjectProperty = FDATUtils::CastPropertyToSupportedObjectProperty<T>(Property);
+			if (ObjectProperty)
+			{
+				return ObjectProperty;
+			}
+		}
+
+		return nullptr;
+	}
+
+	template<typename T, typename R>
+	static R GetSupportedObjectFromObjectProperty(T* ObjectProperty, const UObject* ContainerObject)
+	{
+		static_assert(TSupportedObjectPair<T, R>::Value, "Unsupported Property Type");
+		
+		if (ObjectProperty == nullptr)
+		{
+			return {};
+		}
+
+		if (ContainerObject == nullptr)
+		{
+			return {};
+		}
+
+		return T::GetPropertyValue(ObjectProperty->ContainerPtrToValuePtr<void>(ContainerObject));
+	}
+
+	template<typename T, typename R>
+	static R GetSupportedObjectFromObject(const UObject* Object)
+	{
+		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object), Object);
+	}
 };

@@ -10,6 +10,7 @@
 #include "BlueprintEditorModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "DATUtils.h"
+#include "DATTypes.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -85,19 +86,19 @@ void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 				.IsChecked_Lambda([this, PropertyName]() -> ECheckBoxState
 				{
 					FString TmpResult;
-					const bool bResult = FBlueprintEditorUtils::GetBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, "Thumbnail", TmpResult);
+					const bool bResult = FBlueprintEditorUtils::GetBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, DAT::ThumbnailTag, TmpResult);
 					return bResult ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 				})
 				.OnCheckStateChanged_Lambda([this, PropertyName](ECheckBoxState NewState) -> void
 				{
 					if (NewState == ECheckBoxState::Checked)
 					{
-						FBlueprintEditorUtils::SetBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, "Thumbnail", "");
+						FBlueprintEditorUtils::SetBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, DAT::ThumbnailTag, TEXT(""));
 						BlueprintPtr->Modify();
 					}
 					if (NewState == ECheckBoxState::Unchecked)
 					{
-						FBlueprintEditorUtils::RemoveBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, "Thumbnail");
+						FBlueprintEditorUtils::RemoveBlueprintVariableMetaData(BlueprintPtr.Get(), PropertyName, nullptr, DAT::ThumbnailTag);
 						BlueprintPtr->Modify();
 					}
 				})

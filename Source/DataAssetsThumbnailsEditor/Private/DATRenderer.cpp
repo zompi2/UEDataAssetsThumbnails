@@ -21,13 +21,7 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 
 	const bool bHasThumbnailMetaData = GetHasThumbnailMetaData(Object);
 	
-	UObject* AssetToVisualize = GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
-	if (AssetToVisualize == nullptr)
-	{
-		FSoftObjectPtr AssetToVisualizeSoft = GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
-		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
-	}
-
+	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
 	if (bHasThumbnailMetaData && (AssetToVisualize == nullptr))
 	{
 		AssetViewUtils::ClearCustomThumbnails({ FAssetData(Object) });
@@ -45,18 +39,24 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 	return bResult;
 }
 
+UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) const
+{
+	UObject* AssetToVisualize = FDATUtils::GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
+	if (AssetToVisualize == nullptr)
+	{
+		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
+	}
+
+	return AssetToVisualize;
+}
+
 void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const
 {
 	OutWidth = 256;
 	OutHeight = 256;
 
-	UObject* AssetToVisualize = GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
-	if (AssetToVisualize == nullptr)
-	{
-		FSoftObjectPtr AssetToVisualizeSoft = GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
-		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
-	}
-
+	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
 	if (AssetToVisualize == nullptr)
 	{
 		return;
@@ -73,13 +73,7 @@ void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidt
 
 void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
-	UObject* AssetToVisualize = GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
-	if (AssetToVisualize == nullptr)
-	{
-		FSoftObjectPtr AssetToVisualizeSoft = GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
-		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
-	}
-
+	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
 	if (AssetToVisualize == nullptr)
 	{
 		return;
@@ -118,10 +112,13 @@ bool UDATRenderer::GetHasThumbnailMetaData(UObject* Object) const
 		return false;
 	}
 
-	const FString& HasThumbnailMetaValue = MetaData->GetValue(Object, DAT::HasThumbnailTag);
-	if (HasThumbnailMetaValue == TEXT("true"))
+	FString* HasThumbnailMetaValue = MetaData->RootMetaDataMap.Find(DAT::HasThumbnailTag);
+	if (HasThumbnailMetaValue)
 	{
-		return true;
+		if (*HasThumbnailMetaValue == TEXT("true"))
+		{
+			return true;
+		}
 	}
 
 	return false;
@@ -148,11 +145,11 @@ void UDATRenderer::SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail)
 
 	if (bHasThumbnail)
 	{
-		MetaData->SetValue(Object, DAT::HasThumbnailTag, TEXT("true"));
+		MetaData->RootMetaDataMap.Add(DAT::HasThumbnailTag, TEXT("true"));
 	}
 	else
 	{
-		MetaData->RemoveValue(Object, DAT::HasThumbnailTag);
+		MetaData->RootMetaDataMap.Add(DAT::HasThumbnailTag, TEXT("false"));
 	}
 
 	Object->Modify();
