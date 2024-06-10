@@ -6,6 +6,9 @@
 #include "DATCustomDetails.h"
 #include "BlueprintEditorModule.h"
 #include "ContentBrowserMenuContexts.h"
+#include "ObjectTools.h"
+#include "FileHelpers.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 IMPLEMENT_GAME_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
@@ -106,12 +109,46 @@ void FDATEditorModule::RegisterMenus()
 
 void FDATEditorModule::RefreshThumbnails(const TArray<FAssetData>& SelectedAssets)
 {
+    TArray<UPackage*> PackagesToSave;
 
+    for (const FAssetData& AssetData : SelectedAssets)
+    {
+        UObject* Asset = AssetData.GetAsset();
+        if (Asset && IsValidChecked(Asset))
+        {
+            ThumbnailTools::GenerateThumbnailForObjectToSaveToDisk(Asset);
+            PackagesToSave.Add(Asset->GetPackage());
+        }
+    }
+
+    if (PackagesToSave.Num() > 0)
+    {
+        FEditorFileUtils::FPromptForCheckoutAndSaveParams SaveParams;
+        SaveParams.bCheckDirty = false;
+        SaveParams.bPromptToSave = false;
+        SaveParams.bIsExplicitSave = true;
+
+        FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, SaveParams);
+    }
 }
 
 void FDATEditorModule::RefreshThumbnailsInFolders(const TArray<FString>& SelectedPaths)
 {
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 
+    FARFilter Filter;
+    Filter.ClassPaths.Add(UDataAsset::StaticClass()->GetClassPathName());
+    Filter.bRecursivePaths = true;
+    Filter.bRecursiveClasses = true;
+    for (const FString& Folder : SelectedPaths)
+    {
+        Filter.PackagePaths.Emplace(*Folder);
+    }
+
+    TArray<FAssetData> AssetList;
+    AssetRegistryModule.Get().GetAssets(Filter, AssetList);
+
+    RefreshThumbnails(AssetList);
 }
 
 UE_ENABLE_OPTIMIZATION
