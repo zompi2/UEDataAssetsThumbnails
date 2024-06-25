@@ -9,6 +9,10 @@
 #include "ObjectTools.h"
 #include "FileHelpers.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "ISettingsModule.h"
+#include "DATSettings.h"
+#include "DATAssetTypeActions.h"
+#include "AssetToolsModule.h"
 
 IMPLEMENT_GAME_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
@@ -25,10 +29,41 @@ void FDATEditorModule::StartupModule()
 
     // Register options for refreshing data asset thumbnails
     UToolMenus::Get()->RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FDATEditorModule::RegisterMenus));
+
+    // Register settings
+    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
+    if (SettingsModule)
+    {
+        SettingsModule->RegisterSettings("Project", "Plugins", "DAT",
+            INVTEXT("Data Asset Thumbnails"),
+            INVTEXT("Global settings for Data Asset Thumbnails"),
+            GetMutableDefault<UDATSettings>()
+        );
+    }
+
+    // Register asset action types
+    RefreshAssetTypeActions();
 }
 
 void FDATEditorModule::ShutdownModule()
 {
+    // Unregister settings
+    if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+    {
+        SettingsModule->UnregisterSettings("Project", "Plugins", "DAT");
+    }
+
+    // Unregister asset action types
+    if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+    {
+        IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+        for (auto RegisteredAssetType : CreatedAssetTypeActions)
+        {
+            AssetTools.UnregisterAssetTypeActions(RegisteredAssetType.Value);
+        }
+    }
+    CreatedAssetTypeActions.Empty();
+
     // Unregister thumbnail renderers
     if (UThumbnailManager* ThumbnailManager = UThumbnailManager::TryGet())
     {
@@ -43,11 +78,56 @@ void FDATEditorModule::ShutdownModule()
     if (BlueprintEditorModule)
     {
         BlueprintEditorModule->UnregisterVariableCustomization(FProperty::StaticClass(), OnGetVariableCustomizationInstanceDelegateHandle);
-
     }
 
     // remove menu extension
     UToolMenus::UnregisterOwner(this);
+}
+
+void FDATEditorModule::RefreshAssetTypeActions()
+{
+    UDATSettings* DATSettings = UDATSettings::Get();
+    if (DATSettings)
+    {
+        IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+        TSet<TSubclassOf<UDataAsset>> DesiredClasses;
+
+        for (auto& ColorOverride : DATSettings->GlobalOverrides)
+        {
+            if (ColorOverride.Key && ColorOverride.Value.bOverrideColor)
+            {
+                DesiredClasses.Add(ColorOverride.Key);
+                if (CreatedAssetTypeActions.Contains(ColorOverride.Key))
+                {
+                    CreatedAssetTypeActions[ColorOverride.Key]->DataAssetColor = ColorOverride.Value.Color;
+                }
+                else
+                {
+                    TSharedRef<FDATAssetTypeActions> NewAction = MakeShared<FDATAssetTypeActions>();
+                    NewAction->DataAssetClass = ColorOverride.Key;
+                    NewAction->DataAssetColor = ColorOverride.Value.Color;
+
+                    CreatedAssetTypeActions.Add(ColorOverride.Key, NewAction);
+                    AssetTools.RegisterAssetTypeActions(NewAction);
+                }
+            }
+        }
+
+        TArray<TSubclassOf<UDataAsset>> ClassesToUnregister;
+        for (auto& AssetActionType : CreatedAssetTypeActions)
+        {
+            if (DesiredClasses.Contains(AssetActionType.Key) == false)
+            {
+                ClassesToUnregister.Add(AssetActionType.Key);
+            }
+        }
+
+        for (TSubclassOf<UDataAsset> ClassToUnregister : ClassesToUnregister)
+        {
+            AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[ClassToUnregister]);
+            CreatedAssetTypeActions.Remove(ClassToUnregister);
+        }
+    }
 }
 
 // Check DataValidationModule.cpp for references

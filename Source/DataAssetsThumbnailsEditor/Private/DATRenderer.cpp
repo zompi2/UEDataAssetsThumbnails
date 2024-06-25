@@ -6,6 +6,7 @@
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "AssetViewUtils.h"
 #include "DATUtils.h"
+#include "DATSettings.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -46,6 +47,14 @@ UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) cons
 	{
 		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
+	}
+	if (AssetToVisualize == nullptr)
+	{
+		UDATSettings* DATSettings = UDATSettings::Get();
+		if (DATSettings)
+		{
+			AssetToVisualize = DATSettings->GetDefaultIconForObject(Object);
+		}
 	}
 
 	return AssetToVisualize;

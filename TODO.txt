@@ -1,3 +1,2 @@
 Opcje globalne
-- dać opcje wyświetlania defaultowych ikon (wybranych przez usera) w zależności od klasy
 - dać opcję wyświetlania małej ikonki w rogu w celu lepszej identyfikacji assetu (albo jakaś defautlowa albo ustawiona przez usera)

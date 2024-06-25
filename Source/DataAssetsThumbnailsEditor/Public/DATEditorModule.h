@@ -8,6 +8,10 @@
 class DATAASSETSTHUMBNAILSEDITOR_API FDATEditorModule : public IModuleInterface
 {
 
+public:
+
+	void RefreshAssetTypeActions();
+
 protected:
 
 	void StartupModule() override;
@@ -19,4 +23,5 @@ private:
 	void RefreshThumbnails(const TArray<FAssetData>& SelectedAssets);
 	void RefreshThumbnailsInFolders(const TArray<FString>& SelectedPaths);
 	FDelegateHandle OnGetVariableCustomizationInstanceDelegateHandle;
+	TMap<TSubclassOf<class UDataAsset>, TSharedRef<class FDATAssetTypeActions>> CreatedAssetTypeActions;
 };

@@ -9,6 +9,24 @@
  * Storing settings in DefaultEditor.ini file.
  */
 
+USTRUCT(BlueprintType)
+struct FDATGlobalOverride
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
+    bool bOverrideColor = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideColor"))
+    FColor Color = FColor(201, 29, 85, 255);
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
+    bool bOverrideDefaultIcon = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"))
+    class UTexture2D* DefaultIcon = nullptr;
+};
+
 UCLASS(config = Editor, defaultconfig)
 class DATAASSETSTHUMBNAILSEDITOR_API UDATSettings : public UObject
 {
@@ -17,6 +35,13 @@ class DATAASSETSTHUMBNAILSEDITOR_API UDATSettings : public UObject
 public:
 
     static UDATSettings* Get();
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly)
+    TMap<TSubclassOf<class UDataAsset>, FDATGlobalOverride> GlobalOverrides;
+
+    class UTexture2D* GetDefaultIconForObject(const UObject* Object) const;
+
+    void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 private:
 
