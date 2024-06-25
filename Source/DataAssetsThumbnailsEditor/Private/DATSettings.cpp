@@ -18,10 +18,12 @@ void UDATSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 
 	if (PropertyChangedEvent.MemberProperty && (PropertyChangedEvent.MemberProperty->GetName() == "GlobalOverrides"))
 	{
+	/*
 		if (PropertyChangedEvent.Property && (
 			(PropertyChangedEvent.Property->GetName() == "GlobalOverrides") ||
 			(PropertyChangedEvent.Property->GetName() == "Color") ||
 			(PropertyChangedEvent.Property->GetName() == "bOverrideColor")))
+	*/
 		{
 			FDATEditorModule& DATEditorModule = FModuleManager::LoadModuleChecked<FDATEditorModule>("DataAssetsThumbnailsEditor");
 			DATEditorModule.RefreshAssetTypeActions();

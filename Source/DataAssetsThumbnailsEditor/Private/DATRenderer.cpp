@@ -48,6 +48,8 @@ UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) cons
 		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
+
+	/*
 	if (AssetToVisualize == nullptr)
 	{
 		UDATSettings* DATSettings = UDATSettings::Get();
@@ -56,6 +58,7 @@ UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) cons
 			AssetToVisualize = DATSettings->GetDefaultIconForObject(Object);
 		}
 	}
+	*/
 
 	return AssetToVisualize;
 }

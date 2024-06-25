@@ -94,18 +94,20 @@ void FDATEditorModule::RefreshAssetTypeActions()
 
         for (auto& ColorOverride : DATSettings->GlobalOverrides)
         {
-            if (ColorOverride.Key && ColorOverride.Value.bOverrideColor)
+            if (ColorOverride.Key && (ColorOverride.Value.bOverrideColor || ColorOverride.Value.bOverrideDefaultIcon))
             {
                 DesiredClasses.Add(ColorOverride.Key);
                 if (CreatedAssetTypeActions.Contains(ColorOverride.Key))
                 {
                     CreatedAssetTypeActions[ColorOverride.Key]->DataAssetColor = ColorOverride.Value.Color;
+                    CreatedAssetTypeActions[ColorOverride.Key]->SlateBrush = &ColorOverride.Value.SlateBrush;
                 }
                 else
                 {
                     TSharedRef<FDATAssetTypeActions> NewAction = MakeShared<FDATAssetTypeActions>();
                     NewAction->DataAssetClass = ColorOverride.Key;
                     NewAction->DataAssetColor = ColorOverride.Value.Color;
+                    NewAction->SlateBrush = &ColorOverride.Value.SlateBrush;
 
                     CreatedAssetTypeActions.Add(ColorOverride.Key, NewAction);
                     AssetTools.RegisterAssetTypeActions(NewAction);

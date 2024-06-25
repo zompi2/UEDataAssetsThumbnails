@@ -6,10 +6,43 @@
 #include "DATTraits.h"
 #include "DATTypes.h"
 
+UE_DISABLE_OPTIMIZATION
+
 class DATAASSETSTHUMBNAILSEDITOR_API FDATUtils
 {
 
 public:
+
+	static FStructProperty* CastPropertyToSupportedStructProperty(FProperty* Property)
+	{
+		if (Property == nullptr)
+		{
+			return nullptr;
+		}
+
+		if (Property->GetClass() == nullptr) [[unlikely]]
+		{
+			return nullptr;
+		}
+
+		if (Property->GetClass()->IsChildOf(FStructProperty::StaticClass()) == false)
+		{
+			return nullptr;
+		}
+
+		FStructProperty* StructProperty = static_cast<FStructProperty*>(Property);
+		if (StructProperty == nullptr)
+		{
+			return nullptr;
+		}
+
+		if (StructProperty->Struct->IsChildOf<FSlateBrush>())
+		{
+			return StructProperty;
+		}
+
+		return nullptr;
+	}
 
 	template<typename T>
 	static T* CastPropertyToSupportedObjectProperty(FProperty* Property)
@@ -65,6 +98,12 @@ public:
 
 		FSoftObjectProperty* SoftObjectProperty = CastPropertyToSupportedObjectProperty<FSoftObjectProperty>(Property);
 		if (SoftObjectProperty)
+		{
+			return true;
+		}
+
+		FStructProperty* StructProperty = CastPropertyToSupportedStructProperty(Property);
+		if (StructProperty)
 		{
 			return true;
 		}
@@ -128,3 +167,5 @@ public:
 		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object), Object);
 	}
 };
+
+UE_ENABLE_OPTIMIZATION

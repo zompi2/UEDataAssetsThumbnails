@@ -1,2 +1,3 @@
-Opcje globalne
+- dać opcję ustawienia SlateBrush jako thumbnaila (ogarnąć środek za pomocą traitów i ifconstexpr, żeby nie mnożyć funkcji)
+- spróbować ustawić defaultową teksturę jako slate brush w asset actions (DZIAŁA! Teraz tylko trzeba ustawić odpowiednie edit conditiony)
 - dać opcję wyświetlania małej ikonki w rogu w celu lepszej identyfikacji assetu (albo jakaś defautlowa albo ustawiona przez usera)

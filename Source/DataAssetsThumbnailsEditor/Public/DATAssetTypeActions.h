@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Styling/SlateBrush.h"
 #include "AssetTypeActions_Base.h"
 
 class DATAASSETSTHUMBNAILSEDITOR_API FDATAssetTypeActions : public FAssetTypeActions_Base
@@ -13,8 +14,9 @@ public:
 	uint32 GetCategories() override;
 	FColor GetTypeColor() const override;
 	UClass* GetSupportedClass() const override;
-
+	const FSlateBrush* GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override;
 
 	TSubclassOf<class UDataAsset> DataAssetClass;
 	FColor DataAssetColor;
+	FSlateBrush* SlateBrush = nullptr;
 };

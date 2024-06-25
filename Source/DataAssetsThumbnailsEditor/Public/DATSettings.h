@@ -25,6 +25,9 @@ struct FDATGlobalOverride
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"))
     class UTexture2D* DefaultIcon = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FSlateBrush SlateBrush;
 };
 
 UCLASS(config = Editor, defaultconfig)

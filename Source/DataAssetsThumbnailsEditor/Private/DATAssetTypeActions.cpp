@@ -22,3 +22,8 @@ UClass* FDATAssetTypeActions::GetSupportedClass() const
 {
 	return DataAssetClass;
 }
+
+const FSlateBrush* FDATAssetTypeActions::GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const
+{
+	return SlateBrush;
+}
