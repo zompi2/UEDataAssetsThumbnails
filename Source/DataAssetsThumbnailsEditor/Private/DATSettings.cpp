@@ -18,20 +18,12 @@ void UDATSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 
 	if (PropertyChangedEvent.MemberProperty && (PropertyChangedEvent.MemberProperty->GetName() == "GlobalOverrides"))
 	{
-	/*
-		if (PropertyChangedEvent.Property && (
-			(PropertyChangedEvent.Property->GetName() == "GlobalOverrides") ||
-			(PropertyChangedEvent.Property->GetName() == "Color") ||
-			(PropertyChangedEvent.Property->GetName() == "bOverrideColor")))
-	*/
-		{
-			FDATEditorModule& DATEditorModule = FModuleManager::LoadModuleChecked<FDATEditorModule>("DataAssetsThumbnailsEditor");
-			DATEditorModule.RefreshAssetTypeActions();
-		}
+		FDATEditorModule& DATEditorModule = FModuleManager::LoadModuleChecked<FDATEditorModule>("DataAssetsThumbnailsEditor");
+		DATEditorModule.RefreshAssetTypeActions();
 	}
 }
 
-UTexture2D* UDATSettings::GetDefaultIconForObject(const UObject* Object) const
+UTexture2D* UDATSettings::GetSmallIconForObject(const UObject* Object) const
 {
 	if (Object == nullptr)
 	{
@@ -49,12 +41,7 @@ UTexture2D* UDATSettings::GetDefaultIconForObject(const UObject* Object) const
 		return nullptr;
 	}
 
-	if (Overrides->bOverrideDefaultIcon == false)
-	{
-		return nullptr;
-	}
-
-	return Overrides->DefaultIcon;
+	return Overrides->GetSmallIcon();
 }
 
 UE_ENABLE_OPTIMIZATION

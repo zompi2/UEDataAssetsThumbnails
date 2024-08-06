@@ -92,24 +92,27 @@ void FDATEditorModule::RefreshAssetTypeActions()
         IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
         TSet<TSubclassOf<UDataAsset>> DesiredClasses;
 
-        for (auto& ColorOverride : DATSettings->GlobalOverrides)
+        for (auto& GlobalOverride : DATSettings->GlobalOverrides)
         {
-            if (ColorOverride.Key && (ColorOverride.Value.bOverrideColor || ColorOverride.Value.bOverrideDefaultIcon))
+            const FDATGlobalOverride& OverrideValue = GlobalOverride.Value;
+            TSubclassOf<UDataAsset> OverrideKey = GlobalOverride.Key;
+
+            if (OverrideKey && OverrideValue.OverridesAnything())
             {
-                DesiredClasses.Add(ColorOverride.Key);
-                if (CreatedAssetTypeActions.Contains(ColorOverride.Key))
+                DesiredClasses.Add(OverrideKey);
+                if (CreatedAssetTypeActions.Contains(OverrideKey))
                 {
-                    CreatedAssetTypeActions[ColorOverride.Key]->DataAssetColor = ColorOverride.Value.Color;
-                    CreatedAssetTypeActions[ColorOverride.Key]->SlateBrush = &ColorOverride.Value.SlateBrush;
+                    CreatedAssetTypeActions[OverrideKey]->DataAssetColor = OverrideValue.GetColor();
+                    CreatedAssetTypeActions[OverrideKey]->SlateBrush = OverrideValue.GetDefaultIconBrush();
                 }
                 else
                 {
                     TSharedRef<FDATAssetTypeActions> NewAction = MakeShared<FDATAssetTypeActions>();
-                    NewAction->DataAssetClass = ColorOverride.Key;
-                    NewAction->DataAssetColor = ColorOverride.Value.Color;
-                    NewAction->SlateBrush = &ColorOverride.Value.SlateBrush;
+                    NewAction->DataAssetClass = OverrideKey;
+                    NewAction->DataAssetColor = OverrideValue.GetColor();
+                    NewAction->SlateBrush = OverrideValue.GetDefaultIconBrush();
 
-                    CreatedAssetTypeActions.Add(ColorOverride.Key, NewAction);
+                    CreatedAssetTypeActions.Add(GlobalOverride.Key, NewAction);
                     AssetTools.RegisterAssetTypeActions(NewAction);
                 }
             }

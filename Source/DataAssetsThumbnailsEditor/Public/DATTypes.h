@@ -8,4 +8,5 @@ namespace DAT
 {
 	const FName& ThumbnailTag = "Thumbnail";
 	const FName& HasThumbnailTag = "HasThumbnail";
+	const FColor& DefaultDataAssetColor = FColor(201, 29, 85, 255);
 }

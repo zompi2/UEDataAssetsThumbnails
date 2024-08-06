@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DATTypes.h"
+#include "Engine/Texture2D.h"
+#include "Styling/SlateBrush.h"
 #include "DATSettings.generated.h"
 
 /**
@@ -14,20 +17,47 @@ struct FDATGlobalOverride
 {
     GENERATED_BODY()
 
+    // Overriding the data asset color
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
-    bool bOverrideColor = true;
+    bool bOverrideColor = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideColor"))
-    FColor Color = FColor(201, 29, 85, 255);
+    FColor Color = DAT::DefaultDataAssetColor;
 
+    // Overriding the data asset default icon using Slate Brush
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
-    bool bOverrideDefaultIcon = true;
+    bool bOverrideDefaultIcon = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"))
-    class UTexture2D* DefaultIcon = nullptr;
+    FSlateBrush DefaultIconBrush;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    FSlateBrush SlateBrush;
+    // Setup if displaying small icon in the corner
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
+    bool bOverrideDisplaySmallIcon = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDisplaySmallIcon"))
+    UTexture2D* SmallIcon = nullptr;
+
+    // Is there any type of override
+    bool OverridesAnything() const
+    {
+        return bOverrideColor || bOverrideDefaultIcon || bOverrideDisplaySmallIcon;
+    }
+
+    FColor GetColor() const
+    {
+        return bOverrideColor ? Color : DAT::DefaultDataAssetColor;
+    }
+
+    const FSlateBrush* GetDefaultIconBrush() const
+    {
+        return bOverrideDefaultIcon ? &DefaultIconBrush : nullptr;
+    }
+
+    UTexture2D* GetSmallIcon() const
+    {
+        return bOverrideDisplaySmallIcon ? SmallIcon : nullptr;
+    }
 };
 
 UCLASS(config = Editor, defaultconfig)
@@ -42,11 +72,10 @@ public:
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly)
     TMap<TSubclassOf<class UDataAsset>, FDATGlobalOverride> GlobalOverrides;
 
-    class UTexture2D* GetDefaultIconForObject(const UObject* Object) const;
+    class UTexture2D* GetSmallIconForObject(const UObject* Object) const;
 
     void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 private:
-
 
 };

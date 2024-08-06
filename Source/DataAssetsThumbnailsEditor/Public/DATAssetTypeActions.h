@@ -18,5 +18,5 @@ public:
 
 	TSubclassOf<class UDataAsset> DataAssetClass;
 	FColor DataAssetColor;
-	FSlateBrush* SlateBrush = nullptr;
+	const FSlateBrush* SlateBrush = nullptr;
 };
