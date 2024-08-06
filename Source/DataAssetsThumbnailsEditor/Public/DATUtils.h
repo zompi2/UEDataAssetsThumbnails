@@ -64,25 +64,36 @@ public:
 			return nullptr;
 		}
 
-		T* ObjectProperty = static_cast<T*>(Property);
-		if (ObjectProperty == nullptr)
-		{
-			return nullptr;
-		}
+		T* ObjectStructProperty = static_cast<T*>(Property);
 
-		if (ObjectProperty->PropertyClass == nullptr) [[unlikely]]
+		if constexpr (TIsStructProperty<T>::Value)
 		{
-			return nullptr;
+			if (ObjectStructProperty == nullptr)
+			{
+				return nullptr;
+			}
+
+			if (ObjectStructProperty->Struct->IsChildOf<FSlateBrush>())
+			{
+				return ObjectStructProperty;
+			}
 		}
-	
-		if (ObjectProperty->PropertyClass->IsChildOf<UTexture2D>())
+		else
 		{
-			return ObjectProperty;	
-		}
+			if (ObjectStructProperty->PropertyClass == nullptr) [[unlikely]]
+			{
+				return nullptr;
+			}
 	
-		if (ObjectProperty->PropertyClass->IsChildOf<UMaterialInterface>())
-		{
-			return ObjectProperty;
+			if (ObjectStructProperty->PropertyClass->IsChildOf<UTexture2D>())
+			{
+				return ObjectStructProperty;
+			}
+	
+			if (ObjectStructProperty->PropertyClass->IsChildOf<UMaterialInterface>())
+			{
+				return ObjectStructProperty;
+			}
 		}
 
 		return nullptr;
@@ -102,7 +113,7 @@ public:
 			return true;
 		}
 
-		FStructProperty* StructProperty = CastPropertyToSupportedStructProperty(Property);
+		FStructProperty* StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property);
 		if (StructProperty)
 		{
 			return true;
@@ -133,10 +144,10 @@ public:
 				continue;
 			}
 
-			T* ObjectProperty = FDATUtils::CastPropertyToSupportedObjectProperty<T>(Property);
-			if (ObjectProperty)
+			T* ObjectStructProperty = FDATUtils::CastPropertyToSupportedObjectProperty<T>(Property);
+			if (ObjectStructProperty)
 			{
-				return ObjectProperty;
+				return ObjectStructProperty;
 			}
 		}
 
@@ -144,21 +155,21 @@ public:
 	}
 
 	template<typename T, typename R>
-	static R GetSupportedObjectFromObjectProperty(T* ObjectProperty, const UObject* ContainerObject)
+	static R GetSupportedObjectFromObjectProperty(T* ObjectStructProperty, const UObject* ContainerObject)
 	{
 		static_assert(TSupportedObjectPair<T, R>::Value, "Unsupported Property Type");
 		
-		if (ObjectProperty == nullptr)
+		if (ObjectStructProperty == nullptr)
 		{
 			return {};
 		}
 
-		if (ContainerObject == nullptr)
+		if (ObjectStructProperty == nullptr)
 		{
 			return {};
 		}
 
-		return T::GetPropertyValue(ObjectProperty->ContainerPtrToValuePtr<void>(ContainerObject));
+		return TPropertyTypeFundamentals<R>::GetPropertyValue(ObjectStructProperty->ContainerPtrToValuePtr<void>(ContainerObject));
 	}
 
 	template<typename T, typename R>

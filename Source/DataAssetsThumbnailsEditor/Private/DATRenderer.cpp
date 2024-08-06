@@ -48,18 +48,11 @@ UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) cons
 		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
-
-	/*
 	if (AssetToVisualize == nullptr)
 	{
-		UDATSettings* DATSettings = UDATSettings::Get();
-		if (DATSettings)
-		{
-			AssetToVisualize = DATSettings->GetDefaultIconForObject(Object);
-		}
+		FSlateBrush SlateBrush = FDATUtils::GetSupportedObjectFromObject<FStructProperty, FSlateBrush>(Object);
+		AssetToVisualize = SlateBrush.GetResourceObject();
 	}
-	*/
-
 	return AssetToVisualize;
 }
 
