@@ -1,4 +1,6 @@
 - dać opcję wyświetlania małej ikonki w rogu w celu lepszej identyfikacji assetu (albo jakaś defautlowa albo ustawiona przez usera)
 - dodać opcje ustalenia thumbnaili także poprzez interfejs, jako alternatywa do ustawiania metatagów
 
+- komentarze komentarze komentarze
+
 - Robimy demo! Może w action rpg?
