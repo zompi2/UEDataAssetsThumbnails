@@ -2,6 +2,10 @@
 
 #pragma once
 
+/**
+ * Custom renderer class used for rendering Data Asset thumbnails.
+ */
+
 #include "ThumbnailRendering/TextureThumbnailRenderer.h"
 #include "DATUtils.h"
 #include "DATRenderer.generated.h"
@@ -13,20 +17,51 @@ class DATAASSETSTHUMBNAILSEDITOR_API UDATRenderer : public UThumbnailRenderer
 
 public:
 
+	/**
+	 * Returns true if this renderer can be used for visualizing the asset for the given Object.
+	 */
 	bool CanVisualizeAsset(UObject* Object);
+
+	/**
+	 * Gets the desired thumbnail size for the given asset.
+	 */
 	void GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const override;
+	
+	/**
+	 * Draws the asset for this given Object.
+	 */
 	void Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, class FRenderTarget* Viewport, class FCanvas* Canvas, bool bAdditionalViewFamily) override;
+	
+	/**
+	 * Returns the thumbnail refresh frequency.
+	 */
 	EThumbnailRenderFrequency GetThumbnailRenderFrequency(UObject* Object) const;
 
 protected:
 	
+	/**
+	 * Searches for the object with "Thumbnail" meta data tag inside of the given Object.
+	 * This object will be used to visualize the thumbnail.
+	 */
 	UObject* GetAssetToVisualizeFromObject(const UObject* Object) const;
 
 private: 
 
-	UThumbnailRenderer* GetThumbnailRenderer(UObject* Object) const;
+	/** Used to prevent infinite loop when calling CanVisualizeAsset. */
 	bool bThumbnailLock = false;
 
+	/**
+	 * Gets the correct thumbnail renderer for the Object used to render the thumbnail.
+	 */
+	UThumbnailRenderer* GetThumbnailRenderer(UObject* Object) const;
+
+	/**
+	 * Checks if the given asset has "HasThumbnail" tag.
+	 */
 	bool GetHasThumbnailMetaData(UObject* Object) const;
+
+	/**
+	 * Sets the "HasThumbnail" tag for this asset.
+	 */
 	void SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail);
 };

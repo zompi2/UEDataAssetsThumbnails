@@ -5,4 +5,4 @@
 class DATAASSETSTHUMBNAILS_API FDATModule : public IModuleInterface
 {};
 
-IMPLEMENT_MODULE(FDATModule, DataAssetThumbnails)
+IMPLEMENT_MODULE(FDATModule, DataAssetsThumbnails)

@@ -2,11 +2,15 @@
 
 #pragma once
 
+/**
+ * Default and const values used accross the whole project.
+ */
+
 #include "CoreMinimal.h"
 
 namespace DAT
 {
-	const FName& ThumbnailTag = "Thumbnail";
-	const FName& HasThumbnailTag = "HasThumbnail";
-	const FColor& DefaultDataAssetColor = FColor(201, 29, 85, 255);
+	inline const FName& ThumbnailTag = "Thumbnail";
+	inline const FName& HasThumbnailTag = "HasThumbnail";
+	inline const FColor& DefaultDataAssetColor = FColor(201, 29, 85, 255);
 }

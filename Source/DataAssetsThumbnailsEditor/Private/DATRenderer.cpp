@@ -12,47 +12,60 @@ UE_DISABLE_OPTIMIZATION
 
 bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 {	
+	// Prevent the potential inifinite loop
 	if (bThumbnailLock)
 	{
 		return false;
 	}
 	bThumbnailLock = true;
 
-	bool bResult = false;
-
 	const bool bHasThumbnailMetaData = GetHasThumbnailMetaData(Object);
-	
 	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
+
+	// If this asset has "HasThumbnail" tag, but no correct asset to visualize is available,
+	// clear the current custom thumbnail and remove the tag.
 	if (bHasThumbnailMetaData && (AssetToVisualize == nullptr))
 	{
 		AssetViewUtils::ClearCustomThumbnails({ FAssetData(Object) });
 		SetHasThumbnailMetaData(Object, false);
 	}
+	// If there is an asset to visualize available, but no "HasThumbnail" tag - add this tag.
+	// Thumbnail will be set in the next phase.
+	// The "HasThumbnail" tag prevents from Capturing Custom Thumbnail if a custom one from plugin is set.
 	else if ((bHasThumbnailMetaData == false) && (AssetToVisualize != nullptr))
 	{
 		SetHasThumbnailMetaData(Object, true);
 	}
 
-	bResult = (AssetToVisualize != nullptr);
+	// Store the result now, return true if there is an Asset to Visualize.
+	const bool bResult = (AssetToVisualize != nullptr);
 
+	// Release the lock
 	bThumbnailLock = false;
 	
+	// Return the result
 	return bResult;
 }
 
 UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) const
 {
-	UObject* AssetToVisualize = FDATUtils::GetSupportedObjectFromObject<FObjectProperty, UObject*>(Object);
+	// Try to get a UObject
+	UObject* AssetToVisualize = FDATUtils::FindSupportedThumbnailObjectInObject<FObjectProperty, UObject*>(Object);
+	
 	if (AssetToVisualize == nullptr)
 	{
-		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::GetSupportedObjectFromObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		// If failed, try to get a Soft Object
+		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::FindSupportedThumbnailObjectInObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
+
 	if (AssetToVisualize == nullptr)
 	{
-		FSlateBrush SlateBrush = FDATUtils::GetSupportedObjectFromObject<FStructProperty, FSlateBrush>(Object);
+		// If failed, try to get a Slate Brush
+		FSlateBrush SlateBrush = FDATUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FSlateBrush>(Object);
 		AssetToVisualize = SlateBrush.GetResourceObject();
 	}
+
 	return AssetToVisualize;
 }
 
@@ -78,18 +91,21 @@ void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidt
 
 void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
+	// Obtain the actual asset (Texture2D, MaterialInterface, SlateBrush resource object) used to draw the thumbnail.
 	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
 	if (AssetToVisualize == nullptr)
 	{
 		return;
 	}
 
+	// Get the actual renderer for this object
 	UThumbnailRenderer* Renderer = GetThumbnailRenderer(AssetToVisualize);
 	if (Renderer == nullptr)
 	{
 		return;
 	}
 
+	// Draw this object
 	Renderer->Draw(AssetToVisualize, X, Y, Width, Height, Viewport, Canvas, bAdditionalViewFamily);
 }
 
@@ -158,6 +174,7 @@ void UDATRenderer::SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail)
 	}
 
 	Object->Modify();
+	Object->MarkPackageDirty();
 }
 
 UThumbnailRenderer* UDATRenderer::GetThumbnailRenderer(UObject* Object) const

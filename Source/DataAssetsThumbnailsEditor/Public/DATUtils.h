@@ -2,6 +2,10 @@
 
 #pragma once
 
+/**
+ * Template utilities used for obtaining correct objects and structs from assets properties.
+ */
+
 #include "CoreMinimal.h"
 #include "DATTraits.h"
 #include "DATTypes.h"
@@ -11,39 +15,13 @@ UE_DISABLE_OPTIMIZATION
 class DATAASSETSTHUMBNAILSEDITOR_API FDATUtils
 {
 
-public:
+private:
 
-	static FStructProperty* CastPropertyToSupportedStructProperty(FProperty* Property)
-	{
-		if (Property == nullptr)
-		{
-			return nullptr;
-		}
-
-		if (Property->GetClass() == nullptr) [[unlikely]]
-		{
-			return nullptr;
-		}
-
-		if (Property->GetClass()->IsChildOf(FStructProperty::StaticClass()) == false)
-		{
-			return nullptr;
-		}
-
-		FStructProperty* StructProperty = static_cast<FStructProperty*>(Property);
-		if (StructProperty == nullptr)
-		{
-			return nullptr;
-		}
-
-		if (StructProperty->Struct->IsChildOf<FSlateBrush>())
-		{
-			return StructProperty;
-		}
-
-		return nullptr;
-	}
-
+	/**
+	 * Casts the FProperty into one of the supported FProperty, that stores object that can render thumbnail.
+	 * It can be FObjectProperty or FSoftObjectProperty, that stores UTexture2D or UMaterialInterface.
+	 * It can also be FStructProperty, that stores FSlateBrush.
+	 */
 	template<typename T>
 	static T* CastPropertyToSupportedObjectProperty(FProperty* Property)
 	{
@@ -99,32 +77,16 @@ public:
 		return nullptr;
 	}
 
-	static bool IsPropertySupported(FProperty* Property)
-	{
-		FObjectProperty* ObjectProperty = CastPropertyToSupportedObjectProperty<FObjectProperty>(Property);
-		if (ObjectProperty)
-		{
-			return true;
-		}
-
-		FSoftObjectProperty* SoftObjectProperty = CastPropertyToSupportedObjectProperty<FSoftObjectProperty>(Property);
-		if (SoftObjectProperty)
-		{
-			return true;
-		}
-
-		FStructProperty* StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property);
-		if (StructProperty)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
+	/**
+	 * Find the supported FProperty (can be FObjectProperty, FSoftObjectProperty, or FStructProperty)
+	 * inside of the given Object, which supposed to be a DataAsset.
+	 * It searches for FProperties with Thumbnail Metadata Tag. 
+	 */
 	template<typename T>
 	static T* FindSupportedThumbnailObjectProperty(const UObject* Object)
 	{
+		static_assert(TSupportedPropertyCast<T>::Value, "Unsupported Property Cast Type");
+
 		const UDataAsset* DataAsset = Cast<UDataAsset>(Object);
 		if (DataAsset == nullptr)
 		{
@@ -154,27 +116,68 @@ public:
 		return nullptr;
 	}
 
+	/**
+	 * Gets the object from FProperty. Only supported pairs of FProperty and returned Objects are supported.
+	 * They can be:
+	 *   FObjectProperty - UObject*
+	 *   FSoftObjectProperty - FSoftObjectPtr
+	 *   FStructProperty - FSlateBrush
+	 */
 	template<typename T, typename R>
-	static R GetSupportedObjectFromObjectProperty(T* ObjectStructProperty, const UObject* ContainerObject)
+	static R GetSupportedObjectFromObjectProperty(T* ObjectOrStructProperty, const UObject* ContainerObject)
 	{
 		static_assert(TSupportedObjectPair<T, R>::Value, "Unsupported Property Type");
 		
-		if (ObjectStructProperty == nullptr)
+		if (ObjectOrStructProperty == nullptr)
 		{
 			return {};
 		}
 
-		if (ObjectStructProperty == nullptr)
-		{
-			return {};
-		}
-
-		return TPropertyTypeFundamentals<R>::GetPropertyValue(ObjectStructProperty->ContainerPtrToValuePtr<void>(ContainerObject));
+		return TPropertyTypeFundamentals<R>::GetPropertyValue(ObjectOrStructProperty->ContainerPtrToValuePtr<void>(ContainerObject));
 	}
 
-	template<typename T, typename R>
-	static R GetSupportedObjectFromObject(const UObject* Object)
+public:
+
+	/**
+	 * Checks if the given FProperty is supported by DAT renderer.
+	 * It runs CastPropertyToSupportedObjectProperty for every supported types and checks if any match.
+	 */
+	static bool IsPropertySupported(FProperty* Property)
 	{
+		FObjectProperty* ObjectProperty = CastPropertyToSupportedObjectProperty<FObjectProperty>(Property);
+		if (ObjectProperty)
+		{
+			return true;
+		}
+
+		FSoftObjectProperty* SoftObjectProperty = CastPropertyToSupportedObjectProperty<FSoftObjectProperty>(Property);
+		if (SoftObjectProperty)
+		{
+			return true;
+		}
+
+		FStructProperty* StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property);
+		if (StructProperty)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Finds the object that can be rendered using thumbnail renderer inside of the UObject.
+	 * It searches for UObject*, FSoftObjectPtr or FSlateBrush from the Object.
+	 * The only supported pairs are:
+	 *   FObjectProperty - UObject*
+	 *   FSoftObjectProperty - FSoftObjectPtr
+	 *   FStructProperty - FSlateBrush
+	 */
+	template<typename T, typename R>
+	static R FindSupportedThumbnailObjectInObject(const UObject* Object)
+	{
+		static_assert(TSupportedObjectPair<T, R>::Value, "Unsupported Property Type");
+
 		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object), Object);
 	}
 };

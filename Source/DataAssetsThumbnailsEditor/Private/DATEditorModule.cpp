@@ -16,7 +16,7 @@
 #include "ISettingsModule.h"
 #include "AssetToolsModule.h"
 
-IMPLEMENT_GAME_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
+IMPLEMENT_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
 UE_DISABLE_OPTIMIZATION
 
@@ -254,6 +254,9 @@ void FDATEditorModule::RefreshThumbnails(const TArray<FAssetData>& SelectedAsset
             // GenerateThumbnailForObjectToSaveToDisk should refresh the thumbnail for this asset.
             ThumbnailTools::GenerateThumbnailForObjectToSaveToDisk(Asset);
 
+            // Ensure it's dirty.
+            Asset->MarkPackageDirty();
+
             // Remember this asset to save it later.
             PackagesToSave.Add(Asset->GetPackage());
         }
@@ -263,9 +266,9 @@ void FDATEditorModule::RefreshThumbnails(const TArray<FAssetData>& SelectedAsset
     if (PackagesToSave.Num() > 0)
     {
         FEditorFileUtils::FPromptForCheckoutAndSaveParams SaveParams;
-        SaveParams.bCheckDirty = false;
+        SaveParams.bCheckDirty = true;
         SaveParams.bPromptToSave = false;
-        SaveParams.bIsExplicitSave = true;
+        SaveParams.bIsExplicitSave = false;
 
         FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, SaveParams);
     }

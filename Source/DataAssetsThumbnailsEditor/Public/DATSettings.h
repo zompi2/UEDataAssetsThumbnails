@@ -31,17 +31,10 @@ struct FDATGlobalOverride
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"))
     FSlateBrush DefaultIconBrush;
 
-    // Setup if displaying small icon in the corner
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
-    bool bOverrideDisplaySmallIcon = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDisplaySmallIcon"))
-    UTexture2D* SmallIcon = nullptr;
-
     // Is there any type of override
     bool OverridesAnything() const
     {
-        return bOverrideColor || bOverrideDefaultIcon || bOverrideDisplaySmallIcon;
+        return bOverrideColor || bOverrideDefaultIcon;
     }
 
     FColor GetColor() const
@@ -53,11 +46,6 @@ struct FDATGlobalOverride
     {
         return bOverrideDefaultIcon ? &DefaultIconBrush : nullptr;
     }
-
-    UTexture2D* GetSmallIcon() const
-    {
-        return bOverrideDisplaySmallIcon ? SmallIcon : nullptr;
-    }
 };
 
 UCLASS(config = Editor, defaultconfig)
@@ -67,15 +55,22 @@ class DATAASSETSTHUMBNAILSEDITOR_API UDATSettings : public UObject
 
 public:
 
+    /**
+     * Convenient static getter of the settings.
+     */
     static UDATSettings* Get();
 
+    /**
+     * List of global overrides (color and default icon for assets)
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly)
     TMap<TSubclassOf<class UDataAsset>, FDATGlobalOverride> GlobalOverrides;
 
-    class UTexture2D* GetSmallIconForObject(const UObject* Object) const;
+protected:
 
+    /**
+     * Called when any of the settings has changed. Used to refresh assets when this happens.
+     */
     void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
-private:
 
 };
