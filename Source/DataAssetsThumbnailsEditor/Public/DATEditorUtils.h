@@ -9,10 +9,13 @@
 #include "CoreMinimal.h"
 #include "DATTraits.h"
 #include "DATTypes.h"
+#include "IDataAssetWithThumbnail.h"
+#include "UObject/UnrealType.h"
+#include "Templates/AreTypesEqual.h"
 
 UE_DISABLE_OPTIMIZATION
 
-class DATAASSETSTHUMBNAILSEDITOR_API FDATUtils
+class DATAASSETSTHUMBNAILSEDITOR_API FDATEditorUtils
 {
 
 private:
@@ -44,7 +47,7 @@ private:
 
 		T* ObjectStructProperty = static_cast<T*>(Property);
 
-		if constexpr (TIsStructProperty<T>::Value)
+		if constexpr (ARE_TYPES_EQUAL(T, FStructProperty))
 		{
 			if (ObjectStructProperty == nullptr)
 			{
@@ -106,7 +109,7 @@ private:
 				continue;
 			}
 
-			T* ObjectStructProperty = FDATUtils::CastPropertyToSupportedObjectProperty<T>(Property);
+			T* ObjectStructProperty = FDATEditorUtils::CastPropertyToSupportedObjectProperty<T>(Property);
 			if (ObjectStructProperty)
 			{
 				return ObjectStructProperty;

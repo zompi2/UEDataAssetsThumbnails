@@ -8,13 +8,12 @@ public class DataAssetsThumbnailsEditor : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PrivateIncludePaths.Add("DataAssetsThumbnailsEditor/Private");
-
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
-				"InputCore"
+				"InputCore",
+				"DataAssetsThumbnails"
 			}
 		);
 		

@@ -5,8 +5,9 @@
 #include "UnrealClient.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "AssetViewUtils.h"
-#include "DATUtils.h"
+#include "DATEditorUtils.h"
 #include "DATSettings.h"
+#include "IDataAssetWithThumbnail.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -49,20 +50,30 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 
 UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) const
 {
+	UObject* AssetToVisualize = nullptr;
+
+	if (Object->Implements<UDataAssetWithThumbnail>())
+	{
+		AssetToVisualize = IDataAssetWithThumbnail::Execute_GetAssetToRender(Object);
+	}
+
 	// Try to get a UObject
-	UObject* AssetToVisualize = FDATUtils::FindSupportedThumbnailObjectInObject<FObjectProperty, UObject*>(Object);
+	if (AssetToVisualize == nullptr)
+	{
+		AssetToVisualize = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FObjectProperty, UObject*>(Object);
+	}
 	
 	if (AssetToVisualize == nullptr)
 	{
 		// If failed, try to get a Soft Object
-		FSoftObjectPtr AssetToVisualizeSoft = FDATUtils::FindSupportedThumbnailObjectInObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		FSoftObjectPtr AssetToVisualizeSoft = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
 
 	if (AssetToVisualize == nullptr)
 	{
 		// If failed, try to get a Slate Brush
-		FSlateBrush SlateBrush = FDATUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FSlateBrush>(Object);
+		FSlateBrush SlateBrush = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FSlateBrush>(Object);
 		AssetToVisualize = SlateBrush.GetResourceObject();
 	}
 

@@ -2,3 +2,13 @@
 
 #include "DATUtils.h"
 
+class DATAASSETSTHUMBNAILS_API FDatUtils
+{
+public:
+
+	template<typename T>
+	static UObject* GetFromObject(T* InObject)
+	{
+		
+	}
+};

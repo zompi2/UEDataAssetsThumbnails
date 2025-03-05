@@ -17,12 +17,6 @@ template<> struct TSupportedPropertyCast<FSoftObjectProperty> { enum { Value = t
 template<> struct TSupportedPropertyCast<FStructProperty> { enum { Value = true }; };
 
 /**
- * Checks if the given type is a FStructProperty.
- */
-template<typename T> struct TIsStructProperty { enum { Value = false }; };
-template<> struct TIsStructProperty<FStructProperty> { enum { Value = true }; };
-
-/**
  * Checks if the FProperty and Object type are correctly paired.
  */
 template<typename T, typename R> struct TSupportedObjectPair { enum { Value = false }; };

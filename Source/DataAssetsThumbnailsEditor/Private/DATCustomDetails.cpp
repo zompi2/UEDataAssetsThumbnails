@@ -9,7 +9,7 @@
 #include "IDetailGroup.h"
 #include "BlueprintEditorModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"
-#include "DATUtils.h"
+#include "DATEditorUtils.h"
 #include "DATTypes.h"
 
 UE_DISABLE_OPTIMIZATION
@@ -123,7 +123,7 @@ FProperty* FDATCustomDetails::GetSupportedCustomizableProperty(IDetailLayoutBuil
 	const TWeakFieldPtr<FProperty> PropertyBeingCustomized = PropertyWrapper ? PropertyWrapper->GetProperty() : nullptr;
 	FProperty* Property = PropertyBeingCustomized.IsValid() ? PropertyBeingCustomized.Get() : nullptr;
 
-	if (FDATUtils::IsPropertySupported(Property) == false)
+	if (FDATEditorUtils::IsPropertySupported(Property) == false)
 	{
 		return nullptr;
 	}
