@@ -52,12 +52,13 @@ UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) cons
 {
 	UObject* AssetToVisualize = nullptr;
 
+	// Try to get a UObject from the interface.
 	if (Object->Implements<UDataAssetWithThumbnail>())
 	{
 		AssetToVisualize = IDataAssetWithThumbnail::Execute_GetAssetToRender(Object);
 	}
 
-	// Try to get a UObject
+	// If failed, try to get a UObject directly from the asset.
 	if (AssetToVisualize == nullptr)
 	{
 		AssetToVisualize = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FObjectProperty, UObject*>(Object);
@@ -65,14 +66,14 @@ UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) cons
 	
 	if (AssetToVisualize == nullptr)
 	{
-		// If failed, try to get a Soft Object
+		// If failed, try to get a Soft Object directly from the asset.
 		FSoftObjectPtr AssetToVisualizeSoft = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
 
 	if (AssetToVisualize == nullptr)
 	{
-		// If failed, try to get a Slate Brush
+		// If failed, try to get a Slate Brush directly from the asset.
 		FSlateBrush SlateBrush = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FSlateBrush>(Object);
 		AssetToVisualize = SlateBrush.GetResourceObject();
 	}
