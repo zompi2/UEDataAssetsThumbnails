@@ -2,7 +2,6 @@
 
 #include "DATAssetTypeActions.h"
 
-
 FText FDATAssetTypeActions::GetName() const
 {
 	return NSLOCTEXT("AssetTypeActions", "AssetTypeActions_DataAsset", "Data Asset");

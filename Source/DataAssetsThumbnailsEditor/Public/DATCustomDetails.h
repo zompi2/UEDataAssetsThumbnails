@@ -19,6 +19,7 @@ public:
 	// IDetailCustomization interface
 	void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
 
+
 	FProperty* GetSupportedCustomizableProperty(class IDetailLayoutBuilder& DetailLayout);
 
 	/** The blueprint we are editing */

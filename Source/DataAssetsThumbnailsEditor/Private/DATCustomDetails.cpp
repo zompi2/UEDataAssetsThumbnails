@@ -58,7 +58,7 @@ void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 	const FName PropertyName = Property->GetFName();
 
 	DetailLayout.EditCategory("Variable")
-		.AddCustomRow(INVTEXT("Hello"))
+		.AddCustomRow(INVTEXT("Is Thumbnail"))
 		.NameContent()
 		[
 			SNew(SHorizontalBox)
@@ -70,7 +70,7 @@ void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 				SNew(STextBlock)
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 				.Text(INVTEXT("Is Thumbnail"))
-				.ToolTipText(INVTEXT("Some Tooltip"))
+				.ToolTipText(INVTEXT("This asset will be used as a thumbnail for this Data Asset."))
 			]
 		]
 		.ValueContent()
@@ -82,7 +82,7 @@ void FDATCustomDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 			.VAlign(VAlign_Fill)
 			[
 				SNew(SCheckBox)
-				.ToolTipText(INVTEXT("Some Tooltip"))
+				.ToolTipText(INVTEXT("This asset will be used as a thumbnail for this Data Asset."))
 				.IsChecked_Lambda([this, PropertyName]() -> ECheckBoxState
 				{
 					FString TmpResult;

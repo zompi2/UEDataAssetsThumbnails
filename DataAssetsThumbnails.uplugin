@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0.0",
 	"FriendlyName": "Data Assets Thumbnails",
-	"Description": "Simple tool that displays and sets camera position in editor viewport",
+	"Description": "Displays custom icons for Data Assets.",
 	"Category": "Misc",
 	"CreatedBy": "Damian Nowakowski",
 	"CreatedByURL": "https://zompidev.blogspot.com",

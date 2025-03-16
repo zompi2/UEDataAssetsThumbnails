@@ -17,7 +17,7 @@ struct FDATGlobalOverride
 {
     GENERATED_BODY()
 
-    // Overriding the data asset color
+    // Overriding the Data Asset color
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
     bool bOverrideColor = false;
 
@@ -72,5 +72,4 @@ protected:
      * Called when any of the settings has changed. Used to refresh assets when this happens.
      */
     void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
 };
