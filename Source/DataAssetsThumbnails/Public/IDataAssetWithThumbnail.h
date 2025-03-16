@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "UObject/Interface.h"
 #include "IDataAssetWithThumbnail.generated.h"
 
 UINTERFACE()
