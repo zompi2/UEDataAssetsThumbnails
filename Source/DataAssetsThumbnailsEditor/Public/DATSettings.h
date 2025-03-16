@@ -18,17 +18,17 @@ struct FDATGlobalOverride
     GENERATED_BODY()
 
     // Overriding the Data Asset color
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle), Category = "Data Assets Thumbnails")
     bool bOverrideColor = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideColor"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideColor"), Category = "Data Assets Thumbnails")
     FColor Color = DAT::DefaultDataAssetColor;
 
     // Overriding the data asset default icon using Slate Brush
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle), Category = "Data Assets Thumbnails")
     bool bOverrideDefaultIcon = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"), Category = "Data Assets Thumbnails")
     FSlateBrush DefaultIconBrush;
 
     // Is there any type of override
@@ -63,7 +63,7 @@ public:
     /**
      * List of global overrides (color and default icon for assets)
      */
-    UPROPERTY(config, EditAnywhere, BlueprintReadOnly)
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     TMap<TSubclassOf<class UDataAsset>, FDATGlobalOverride> GlobalOverrides;
 
 protected:
