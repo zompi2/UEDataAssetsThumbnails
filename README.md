@@ -4,11 +4,11 @@
 - [What is DAT plugin?](#what-is-dat-plugin)
 - [Which assets can be used as a thumbnail?](#which-assets-can-be-used-as-a-thumbnail)
 - [How to set a variable to be an Data Assets' thumbnail?](#which-assets-can-be-used-as-a-thumbnail)
-- [How to set that variable using only BP?]()
-- [What if I set multiple variables to be a thumbnail?]()
-- [What if my thumbnail asset is inside of a struct?]()
-- [How to setup default Data Assets color and icon?]()
-- [What if thumbnail don't want to change?]()
+- [How to set that variable using only BP?](#how-to-set-that-variable-using-only-BP)
+- [What if I set multiple variables to be a thumbnail?](#what-if-i-set-multiple-variables-to-be-a-thumbnail)
+- [What if my thumbnail asset is inside of a struct?](#what-if-my-thumbnail-asset-is-inside-of-a-struct)
+- [How to setup default Data Assets color and icon?](#how-to-setup-default-data-asset-color-and-icon)
+- [What if thumbnail don't want to change?](#what-if-thumbnail-dont-want-to-change)
 
 ## What is DAT plugin?
 
