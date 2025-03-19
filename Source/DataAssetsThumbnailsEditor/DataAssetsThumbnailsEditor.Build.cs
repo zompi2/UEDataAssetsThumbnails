@@ -6,18 +6,20 @@ public class DataAssetsThumbnailsEditor : ModuleRules
 {
 	public DataAssetsThumbnailsEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        // To ensure IWYU
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(
+        // Required modules
+        PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
-				"InputCore",
-				"DataAssetsThumbnails"
+                "Core",
+                "DataAssetsThumbnails"
 			}
 		);
-		
-		PrivateDependencyModuleNames.AddRange(
+
+        // Required modules
+        PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
                 "Engine",

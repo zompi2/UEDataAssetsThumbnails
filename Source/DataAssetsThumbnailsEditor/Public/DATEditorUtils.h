@@ -54,7 +54,7 @@ private:
 				return nullptr;
 			}
 
-			if (ObjectStructProperty->Struct->IsChildOf<FSlateBrush>())
+			if (ObjectStructProperty->Struct->IsChildOf(FSlateBrush::StaticStruct()))
 			{
 				return ObjectStructProperty;
 			}

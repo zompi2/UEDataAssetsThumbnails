@@ -15,7 +15,8 @@ public class DataAssetsThumbnails : ModuleRules
 			{
 				"Core",
 				"CoreUObject",
-				"Engine"
+				"Engine",
+                "SlateCore"
 			}
 		);
     }
