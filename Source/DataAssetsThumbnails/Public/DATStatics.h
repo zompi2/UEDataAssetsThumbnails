@@ -20,17 +20,17 @@ public:
 	 * Converts Texture2D to the object valid for Data Asset thumbnail rendering.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Data Assets Thumbnails")
-	UObject* TextureToThumbnailRenderObject(UTexture2D* InTexture);
+	static UObject* TextureToThumbnailRenderObject(UTexture2D* InTexture);
 
 	/**
 	 * Converts Material or Material Instance to the object valid for Data Asset thumbnail rendering.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Data Assets Thumbnails")
-	UObject* MaterialToThumbnailRenderObject(UMaterialInterface* InMaterial);
+	static UObject* MaterialToThumbnailRenderObject(UMaterialInterface* InMaterial);
 
 	/**
 	 * Converts Slate Brush to the object valid for Data Asset thumbnail rendering.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Data Assets Thumbnails")
-	UObject* SlateBrushToThumbnailRenderObject(const FSlateBrush& InBrush);
+	static UObject* SlateBrushToThumbnailRenderObject(const FSlateBrush& InBrush);
 };
