@@ -139,13 +139,17 @@ bool UDATRenderer::GetHasThumbnailMetaData(UObject* Object) const
 		return false;
 	}
 
+#if ((ENGINE_MAJOR_VERSION == 5) && (ENGINE_MINOR_VERSION >= 6))
+	FString* HasThumbnailMetaValue = Package->GetMetaData().RootMetaDataMap.Find(DAT::HasThumbnailTag);
+#else
 	UMetaData* MetaData = Package->GetMetaData();
 	if (MetaData == nullptr)
 	{
 		return false;
 	}
-
 	FString* HasThumbnailMetaValue = MetaData->RootMetaDataMap.Find(DAT::HasThumbnailTag);
+#endif
+
 	if (HasThumbnailMetaValue)
 	{
 		if (*HasThumbnailMetaValue == TEXT("true"))
@@ -170,6 +174,17 @@ void UDATRenderer::SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail)
 		return;
 	}
 
+#if ((ENGINE_MAJOR_VERSION == 5) && (ENGINE_MINOR_VERSION >= 6))
+	FMetaData& MetaData = Package->GetMetaData();
+	if (bHasThumbnail)
+	{
+		MetaData.RootMetaDataMap.Add(DAT::HasThumbnailTag, TEXT("true"));
+	}
+	else
+	{
+		MetaData.RootMetaDataMap.Add(DAT::HasThumbnailTag, TEXT("false"));
+	}
+#else
 	UMetaData* MetaData = Package->GetMetaData();
 	if (MetaData == nullptr)
 	{
@@ -184,6 +199,7 @@ void UDATRenderer::SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail)
 	{
 		MetaData->RootMetaDataMap.Add(DAT::HasThumbnailTag, TEXT("false"));
 	}
+#endif
 
 	Object->Modify();
 	Object->MarkPackageDirty();
