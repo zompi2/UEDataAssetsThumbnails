@@ -64,4 +64,8 @@ private:
 	 * Sets the "HasThumbnail" tag for this asset.
 	 */
 	void SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail);
+
+
+	UTexture2D* IsTheAssetToVisualizeTransparentTexture2D(UObject* Object);
+	void DrawTextureWithSolidColor(UTexture2D* Texture, FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height);
 };

@@ -8,6 +8,13 @@
 #include "DATEditorUtils.h"
 #include "DATSettings.h"
 #include "IDataAssetWithThumbnail.h"
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
+#include "GlobalRenderResources.h"
+#include "Texture2DPreview.h"
+#include "Slate/WidgetRenderer.h"
+#include "SlateMaterialBrush.h"
+#include "Styling/CoreStyle.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -101,6 +108,36 @@ void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidt
 	Renderer->GetThumbnailSize(AssetToVisualize, Zoom, OutWidth, OutHeight);
 }
 
+UTexture2D* UDATRenderer::IsTheAssetToVisualizeTransparentTexture2D(UObject* Object)
+{
+	if (UTexture2D* Tex = Cast<UTexture2D>(Object))
+	{
+		if (Tex->HasAlphaChannel() && ((Tex->LODGroup == TEXTUREGROUP_UI) || (Tex->LODGroup == TEXTUREGROUP_Pixels2D)))
+		{
+			return Tex;
+		}
+	}
+	return nullptr;
+}
+
+void UDATRenderer::DrawTextureWithSolidColor(UTexture2D* Texture, FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height)
+{
+	Canvas->DrawTile(0, 0, Width, Height, 0, 0, 1, 1, Color, GWhiteTexture);
+	FCanvasTileItem CanvasTile(FVector2D(0, 0), Texture->GetResource(), FVector2D(Width, Height), FLinearColor::White);
+	CanvasTile.BlendMode = (ESimpleElementBlendMode)(SE_BLEND_RGBA_MASK_START + 0xF);
+	CanvasTile.BatchedElementParameters = new FBatchedElementTexture2DPreviewParameters(
+		-1.f,
+		0,
+		-1.f,
+		Texture->IsNormalMap(),
+		Texture->CompressionSettings == TC_Grayscale || Texture->CompressionSettings == TC_Alpha,
+		Texture->IsVirtualTexturedWithSinglePhysicalSpace(),
+		false,
+		false,
+		false);
+	CanvasTile.Draw(Canvas);
+}
+
 void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
 	// Obtain the actual asset (Texture2D, MaterialInterface, SlateBrush resource object) used to draw the thumbnail.
@@ -110,6 +147,63 @@ void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 
 		return;
 	}
 
+	if (UDATSettings::Get()->UseSolidColorOnTransluentIcons(Object->GetClass()))
+	{
+		const FColor BGColor = UDATSettings::Get()->GetBGColor(Object->GetClass());
+		if (UTexture2D* Tex = IsTheAssetToVisualizeTransparentTexture2D(AssetToVisualize))
+		{
+			DrawTextureWithSolidColor(Tex, Canvas, BGColor, Width, Height);
+			return;
+		}
+
+		if (UMaterialInterface* MatInst = Cast<UMaterialInterface>(AssetToVisualize))
+		{
+			UMaterial* Mat = MatInst->GetMaterial();
+			if (Mat != nullptr && Mat->IsUIMaterial())
+			{
+				EBlendMode BlendMode = Mat->GetBlendMode();
+				if (BlendMode == BLEND_Masked || BlendMode == BLEND_Translucent)
+				{
+					FWidgetRenderer* WidgetRenderer = new FWidgetRenderer(true);
+					FSlateMaterialBrush* UIMaterialBrush = new FSlateMaterialBrush(FVector2D(SlateBrushDefs::DefaultImageSize, SlateBrushDefs::DefaultImageSize));
+
+					UIMaterialBrush->SetMaterial(MatInst);
+
+					UTexture2D* SolidTexture = UThumbnailManager::Get().CheckerboardTexture;
+
+					FSlateBrush SolidBrush = *FAppStyle::GetBrush("WhiteBrush");
+					SolidBrush.ImageSize = FVector2D(GWhiteTexture->GetSizeX(), GWhiteTexture->GetSizeY());
+					SolidBrush.Tiling = ESlateBrushTileType::Both;
+					SolidBrush.TintColor = BGColor;
+
+					TSharedRef<SWidget> Thumbnail =
+						SNew(SOverlay)
+
+						// Checkerboard
+						+ SOverlay::Slot()
+						[
+							SNew(SImage)
+								.Image(&SolidBrush)
+						]
+
+						+ SOverlay::Slot()
+						[
+							SNew(SImage)
+								.Image(UIMaterialBrush)
+						];
+
+					const FVector2D DrawSize((float)Width, (float)Height);
+					const float DeltaTime = 0.f;
+					WidgetRenderer->DrawWidget(Viewport, Thumbnail, DrawSize, DeltaTime);
+
+					UIMaterialBrush->SetMaterial(nullptr);
+
+					return;
+				}
+			}
+		}
+	}
+	
 	// Get the actual renderer for this object
 	UThumbnailRenderer* Renderer = GetThumbnailRenderer(AssetToVisualize);
 	if (Renderer == nullptr)

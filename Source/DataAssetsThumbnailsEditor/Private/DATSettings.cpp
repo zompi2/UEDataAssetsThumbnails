@@ -24,4 +24,22 @@ void UDATSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 	}
 }
 
+bool UDATSettings::UseSolidColorOnTransluentIcons(TSubclassOf<UDataAsset> AssetClass)
+{
+	if (FDATGlobalOverride* Overrides = GlobalOverrides.Find(AssetClass))
+	{
+		return Overrides->bUseSolidColorOnTranslucentIcons;
+	}
+	return bUseSolidColorOnTranslucentIcons;
+}
+
+FColor UDATSettings::GetBGColor(TSubclassOf<UDataAsset> AssetClass)
+{
+	if (FDATGlobalOverride* Overrides = GlobalOverrides.Find(AssetClass))
+	{
+		return Overrides->GetBGColor();
+	}
+	return DefaultBackgroundColor;
+}
+
 UE_ENABLE_OPTIMIZATION

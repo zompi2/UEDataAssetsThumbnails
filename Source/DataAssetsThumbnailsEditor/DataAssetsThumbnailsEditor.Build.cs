@@ -36,7 +36,9 @@ public class DataAssetsThumbnailsEditor : ModuleRules
 				"Kismet",
 				"ContentBrowser",
 				"AssetRegistry",
-				"Settings"
+				"Settings",
+				"RenderCore",
+				"UMG"
 			}
 		);
 	}
