@@ -65,7 +65,9 @@ private:
 	 */
 	void SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail);
 
+	bool TryDrawUITextureWithSolidBGColor(UObject* Object, class FCanvas* Canvas, FLinearColor BGColor, uint32 Width, uint32 Height);
+	bool TryDrawUIMaterialWithSolidBGColor(UObject* Object, class FRenderTarget* Viewport, FLinearColor BGColor, uint32 Width, uint32 Height);
 
-	UTexture2D* IsTheAssetToVisualizeTransparentTexture2D(UObject* Object);
-	void DrawTextureWithSolidColor(UTexture2D* Texture, FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height);
+	class FWidgetRenderer* WidgetRenderer;
+	struct FSlateMaterialBrush* UIMaterialBrush;
 };

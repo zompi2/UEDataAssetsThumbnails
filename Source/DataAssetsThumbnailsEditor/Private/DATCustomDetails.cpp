@@ -12,8 +12,6 @@
 #include "DATEditorUtils.h"
 #include "DATTypes.h"
 
-UE_DISABLE_OPTIMIZATION
-
 FDATCustomDetails::FDATCustomDetails(UBlueprint* InBlueprintPtr) 
 : BlueprintPtr(InBlueprintPtr)
 {
@@ -130,5 +128,3 @@ FProperty* FDATCustomDetails::GetSupportedCustomizableProperty(IDetailLayoutBuil
 
 	return Property;
 }
-
-UE_ENABLE_OPTIMIZATION

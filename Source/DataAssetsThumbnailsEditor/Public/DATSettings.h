@@ -34,11 +34,8 @@ struct FDATGlobalOverride
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bUseSolidColorOnTranslucentIcons = true;
 
-    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons"))
-    bool bUseAssetColorAsBackgroundColor = true;
-
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons && !bUseAssetColorAsBackgroundColor"))
-    FColor DefaultBackgroundColor = DAT::DefaultBGColor;
+    FLinearColor BackgroundColor = DAT::DefaultBGColor;
 
     // Is there any type of override
     bool OverridesAnything() const
@@ -56,20 +53,9 @@ struct FDATGlobalOverride
         return bOverrideDefaultIcon ? &DefaultIconBrush : nullptr;
     }
 
-    FColor GetBGColor() const
+    FLinearColor GetBGColor() const
     {
-        if (bUseAssetColorAsBackgroundColor)
-        {
-            FColor Result = Color;
-            Result.R *= 0.75;
-            Result.G *= 0.75;
-            Result.B *= 0.75;
-            return Result;
-        } 
-        else
-        {
-            DefaultBackgroundColor;
-        }
+        return bUseSolidColorOnTranslucentIcons ? BackgroundColor : DAT::DefaultBGColor;
     }
 };
 
@@ -95,10 +81,11 @@ public:
     bool bUseSolidColorOnTranslucentIcons = true;
 
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons"))
-    FColor DefaultBackgroundColor = DAT::DefaultBGColor;
+    FLinearColor DefaultBackgroundColor = DAT::DefaultBGColor;
 
-    bool UseSolidColorOnTransluentIcons(TSubclassOf<class UDataAsset> AssetClass);
-    FColor GetBGColor(TSubclassOf<class UDataAsset> AssetClass);
+    bool UseSolidColorOnTransluentIconOnAsset(TSubclassOf<class UDataAsset> AssetClass);
+
+    FLinearColor GetAssetBGColor(TSubclassOf<class UDataAsset> AssetClass);
 
 protected:
 

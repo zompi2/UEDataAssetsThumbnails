@@ -13,5 +13,5 @@ namespace DAT
 	inline const FName& ThumbnailTag = "Thumbnail";
 	inline const FName& HasThumbnailTag = "HasThumbnail";
 	inline const FColor& DefaultDataAssetColor = FColor(201, 29, 85, 255);
-	inline const FColor& DefaultBGColor = FColor(128, 128, 128, 255);
+	inline const FLinearColor& DefaultBGColor = FLinearColor(.5f, .5f, .5f, 1.f);
 }
