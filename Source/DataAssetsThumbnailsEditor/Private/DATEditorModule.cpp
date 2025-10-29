@@ -112,7 +112,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
         const FDATGlobalOverride& OverrideValue = GlobalOverride.Value;
 
         // If there is any kind of override...
-        if (OverrideKey && OverrideValue.OverridesAnything())
+        if (OverrideKey && OverrideValue.OverridesAnyAssetTypeActionData())
         {
             // This data asset class is overriden.
             DesiredClasses.Add(OverrideKey);
