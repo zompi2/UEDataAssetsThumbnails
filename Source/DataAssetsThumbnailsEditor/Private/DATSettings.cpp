@@ -5,8 +5,6 @@
 #include "DATSettings.h"
 #include "DATEditorModule.h"
 
-UE_DISABLE_OPTIMIZATION
-
 UDATSettings* UDATSettings::Get()
 {
 	return GetMutableDefault<UDATSettings>();
@@ -24,4 +22,20 @@ void UDATSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 	}
 }
 
-UE_ENABLE_OPTIMIZATION
+bool UDATSettings::UseSolidColorOnTransluentIconOnAsset(TSubclassOf<UDataAsset> AssetClass) const
+{
+	if (const FDATGlobalOverride* Overrides = GlobalOverrides.Find(AssetClass))
+	{
+		return Overrides->bUseSolidColorOnTranslucentIcons;
+	}
+	return bUseSolidColorOnTranslucentIcons;
+}
+
+FLinearColor UDATSettings::GetAssetBGColor(TSubclassOf<UDataAsset> AssetClass) const
+{
+	if (const FDATGlobalOverride* Overrides = GlobalOverrides.Find(AssetClass))
+	{
+		return Overrides->BackgroundColor;
+	}
+	return DefaultBackgroundColor;
+}

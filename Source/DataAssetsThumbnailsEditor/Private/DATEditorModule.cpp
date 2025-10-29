@@ -18,8 +18,6 @@
 
 IMPLEMENT_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
-UE_DISABLE_OPTIMIZATION
-
 void FDATEditorModule::StartupModule()
 {
     // Register custom thumbnail renderers for all data assets.
@@ -114,7 +112,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
         const FDATGlobalOverride& OverrideValue = GlobalOverride.Value;
 
         // If there is any kind of override...
-        if (OverrideKey && OverrideValue.OverridesAnything())
+        if (OverrideKey && OverrideValue.OverridesAnyAssetTypeActionData())
         {
             // This data asset class is overriden.
             DesiredClasses.Add(OverrideKey);
@@ -297,5 +295,3 @@ void FDATEditorModule::RefreshThumbnailsInFolders(const TArray<FString>& Selecte
     // Run RefreshThumbnails on all these obtained assets.
     RefreshThumbnails(AssetList);
 }
-
-UE_ENABLE_OPTIMIZATION

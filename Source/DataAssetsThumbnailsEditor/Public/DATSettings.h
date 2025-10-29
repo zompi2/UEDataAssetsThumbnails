@@ -31,17 +31,26 @@ struct FDATGlobalOverride
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"), Category = "Data Assets Thumbnails")
     FSlateBrush DefaultIconBrush;
 
-    // Is there any type of override
-    bool OverridesAnything() const
+    // Overriding if the data asset should draw solid background if transparent (instead of standard checkerboard)
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
+    bool bUseSolidColorOnTranslucentIcons = false;
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons && !bUseAssetColorAsBackgroundColor"))
+    FLinearColor BackgroundColor = DAT::DefaultBGColor;
+
+    // Is there any type of override that changes Asset Type Action Data
+    bool OverridesAnyAssetTypeActionData() const
     {
         return bOverrideColor || bOverrideDefaultIcon;
     }
 
+    // Returns the Data Asset color for this asset
     FColor GetColor() const
     {
         return bOverrideColor ? Color : DAT::DefaultDataAssetColor;
     }
 
+    // Returns the Data Asset color for this asset
     const FSlateBrush* GetDefaultIconBrush() const
     {
         return bOverrideDefaultIcon ? &DefaultIconBrush : nullptr;
@@ -65,6 +74,28 @@ public:
      */
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     TMap<TSubclassOf<class UDataAsset>, FDATGlobalOverride> GlobalOverrides;
+
+    /**
+     * Tells if the background under the transparent icons should be solid or a standard checkerboard.
+     */
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
+    bool bUseSolidColorOnTranslucentIcons = false;
+
+    /**
+     * Color of the solid background under the transparent icons.
+     */
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons"))
+    FLinearColor DefaultBackgroundColor = DAT::DefaultBGColor;
+
+    /**
+     * Checks if this asset type should render solid background color if icon is transparent.
+     */
+    bool UseSolidColorOnTransluentIconOnAsset(TSubclassOf<class UDataAsset> AssetClass) const;
+
+    /**
+     * Checks this asset background color to be rendered if icon is transparent.
+     */
+    FLinearColor GetAssetBGColor(TSubclassOf<class UDataAsset> AssetClass) const;
 
 protected:
 

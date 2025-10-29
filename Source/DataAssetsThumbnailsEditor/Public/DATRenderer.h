@@ -64,4 +64,22 @@ private:
 	 * Sets the "HasThumbnail" tag for this asset.
 	 */
 	void SetHasThumbnailMetaData(UObject* Object, bool bHasThumbnail);
+
+	/**
+	 * Tries to draw the translucent UI Texture with the solid background.
+	 * Returns true if success.
+	 */
+	bool TryDrawUITextureWithSolidBGColor(UObject* Object, class FCanvas* Canvas, FLinearColor BGColor, uint32 Width, uint32 Height);
+
+	/**
+	 * Tries to draw the tranlucent UI Material with the solid background.
+	 * Returns true if success.
+	 */
+	bool TryDrawUIMaterialWithSolidBGColor(UObject* Object, class FRenderTarget* Viewport, FLinearColor BGColor, uint32 Width, uint32 Height);
+
+	/** Widget renderer required for Material thumbnails custom drawing. */
+	class FWidgetRenderer* WidgetRenderer = nullptr;
+
+	/** Slate Material Brush required for Material thumbnails custom drawing. */
+	struct FSlateMaterialBrush* UIMaterialBrush = nullptr;
 };
