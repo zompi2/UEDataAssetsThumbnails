@@ -31,9 +31,9 @@ struct FDATGlobalOverride
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"), Category = "Data Assets Thumbnails")
     FSlateBrush DefaultIconBrush;
 
-    // Overriding if the data asset should draw solid background if transparent (instead of standard checkerboard)
+    // Overriding if the data asset should draw solid background if with transulency (instead of standard checkerboard)
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
-    bool bUseSolidColorOnTranslucentIcons = false;
+    bool bSolidBackgroundOnTranslucentIcons = false;
 
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons && !bUseAssetColorAsBackgroundColor"))
     FLinearColor BackgroundColor = DAT::DefaultBGColor;
@@ -76,10 +76,10 @@ public:
     TMap<TSubclassOf<class UDataAsset>, FDATGlobalOverride> GlobalOverrides;
 
     /**
-     * Tells if the background under the transparent icons should be solid or a standard checkerboard.
+     * Tells if the background under the icons with translucency should be solid or a standard checkerboard.
      */
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
-    bool bUseSolidColorOnTranslucentIcons = false;
+    bool bSolidBackgroundOnTranslucentIcons = false;
 
     /**
      * Color of the solid background under the transparent icons.
@@ -88,9 +88,9 @@ public:
     FLinearColor DefaultBackgroundColor = DAT::DefaultBGColor;
 
     /**
-     * Checks if this asset type should render solid background color if icon is transparent.
+     * Checks if this asset type should render solid background color if icon has translucency.
      */
-    bool UseSolidColorOnTransluentIconOnAsset(TSubclassOf<class UDataAsset> AssetClass) const;
+    bool SolidBackgroundOnTranslucentIcons(TSubclassOf<class UDataAsset> AssetClass) const;
 
     /**
      * Checks this asset background color to be rendered if icon is transparent.

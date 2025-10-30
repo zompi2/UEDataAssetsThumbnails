@@ -217,26 +217,26 @@ void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 
 		return;
 	}
 
-	// If the solid color on translucen icons is enabled, try to draw the asset with the solid background
-	if (UDATSettings::Get()->UseSolidColorOnTransluentIconOnAsset(Object->GetClass()))
+	// If the solid color on icons with translucency is enabled, try to draw the asset with the solid background.
+	if (UDATSettings::Get()->SolidBackgroundOnTranslucentIcons(Object->GetClass()))
 	{
 		const FLinearColor BGColor = UDATSettings::Get()->GetAssetBGColor(Object->GetClass());
 
-		// For Textures
+		// For Textures.
 		if (TryDrawUITextureWithSolidBGColor(AssetToVisualize, Canvas, BGColor, Width, Height))
 		{
 			return;
 		}
 
-		// For Materials
+		// For Materials.
 		if (TryDrawUIMaterialWithSolidBGColor(AssetToVisualize, Viewport, BGColor, Width, Height))
 		{
 			return;
 		}
 	}
 		
-	// The thumbnail hasn't been yet rendered. Go to the standard render path.
-	// Get the actual renderer for this object
+	// The thumbnail hasn't been yet rendered. Try the standard render path.
+	// Get the actual renderer for this object.
 	UThumbnailRenderer* Renderer = GetThumbnailRenderer(AssetToVisualize);
 	if (Renderer == nullptr)
 	{

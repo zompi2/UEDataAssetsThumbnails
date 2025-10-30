@@ -22,13 +22,13 @@ void UDATSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 	}
 }
 
-bool UDATSettings::UseSolidColorOnTransluentIconOnAsset(TSubclassOf<UDataAsset> AssetClass) const
+bool UDATSettings::SolidBackgroundOnTranslucentIcons(TSubclassOf<UDataAsset> AssetClass) const
 {
 	if (const FDATGlobalOverride* Overrides = GlobalOverrides.Find(AssetClass))
 	{
-		return Overrides->bUseSolidColorOnTranslucentIcons;
+		return Overrides->bSolidBackgroundOnTranslucentIcons;
 	}
-	return bUseSolidColorOnTranslucentIcons;
+	return bSolidBackgroundOnTranslucentIcons;
 }
 
 FLinearColor UDATSettings::GetAssetBGColor(TSubclassOf<UDataAsset> AssetClass) const
