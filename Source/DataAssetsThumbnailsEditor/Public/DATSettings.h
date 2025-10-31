@@ -35,7 +35,7 @@ struct FDATGlobalOverride
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bSolidBackgroundOnTranslucentIcons = false;
 
-    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons && !bUseAssetColorAsBackgroundColor"))
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bSolidBackgroundOnTranslucentIcons"))
     FLinearColor BackgroundColor = DAT::DefaultBGColor;
 
     // Is there any type of override that changes Asset Type Action Data
@@ -84,7 +84,7 @@ public:
     /**
      * Color of the solid background under the transparent icons.
      */
-    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bUseSolidColorOnTranslucentIcons"))
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bSolidBackgroundOnTranslucentIcons"))
     FLinearColor DefaultBackgroundColor = DAT::DefaultBGColor;
 
     /**
