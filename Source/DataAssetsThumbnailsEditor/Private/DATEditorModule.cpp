@@ -2,6 +2,7 @@
 
 #include "DATEditorModule.h"
 
+#include "DATEditorStyle.h"
 #include "DATRenderer.h"
 #include "DATCustomDetails.h"
 #include "DATSettings.h"
@@ -20,6 +21,10 @@ IMPLEMENT_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
 void FDATEditorModule::StartupModule()
 {
+    // Register Styles.
+    FDATEditorStyle::Initialize();
+    FDATEditorStyle::ReloadTextures();
+
     // Register custom thumbnail renderers for all data assets.
     UThumbnailManager::Get().RegisterCustomRenderer(UDataAsset::StaticClass(), UDATRenderer::StaticClass());
 
@@ -82,6 +87,9 @@ void FDATEditorModule::ShutdownModule()
             ThumbnailManager->UnregisterCustomRenderer(UDataAsset::StaticClass());
         }
     }
+
+    // Unregister Styles.
+    FDATEditorStyle::Shutdown();
 }
 
 /**
@@ -201,7 +209,7 @@ void FDATEditorModule::RegisterMenus()
             "RefreshThumbnails",
             INVTEXT("Refresh Thumbnails"),
             INVTEXT("Refresh Thumbnails on these assets"),
-            FSlateIcon(),
+            FSlateIcon(FDATEditorStyle::GetStyleSetName(), "DATEditorStyle.MenuIcon"),
             Action
         );
     }
@@ -229,7 +237,7 @@ void FDATEditorModule::RegisterMenus()
             "RefreshThumbnailsPath",
             INVTEXT("Refresh Thumbnails"),
             INVTEXT("Refresh Thumbnails on assets in this directory"),
-            FSlateIcon(),
+            FSlateIcon(FDATEditorStyle::GetStyleSetName(), "DATEditorStyle.MenuIcon"),
             Action
         );
     }
