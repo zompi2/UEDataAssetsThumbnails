@@ -18,21 +18,21 @@ struct FDATGlobalOverride
     GENERATED_BODY()
 
     // Overriding the Data Asset color
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle), Category = "Data Assets Thumbnails")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bOverrideColor = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideColor"), Category = "Data Assets Thumbnails")
     FColor Color = DAT::DefaultDataAssetColor;
 
     // Overriding the data asset default icon using Slate Brush
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle), Category = "Data Assets Thumbnails")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bOverrideDefaultIcon = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"), Category = "Data Assets Thumbnails")
     FSlateBrush DefaultIconBrush;
 
     // Overriding if the data asset should draw solid background if with transulency (instead of standard checkerboard)
-    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle), Category = "Data Assets Thumbnails")
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bSolidBackgroundOnTranslucentIcons = false;
 
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails", meta = (EditCondition = "bSolidBackgroundOnTranslucentIcons"))
@@ -78,7 +78,7 @@ public:
     /**
      * Tells if the background under the icons with translucency should be solid or a standard checkerboard.
      */
-    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, meta = (InlineEditConditionToggle), Category = "Data Assets Thumbnails")
+    UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bSolidBackgroundOnTranslucentIcons = false;
 
     /**
