@@ -20,6 +20,7 @@ public:
 	FColor GetTypeColor() const override;
 	UClass* GetSupportedClass() const override;
 	const FSlateBrush* GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override;
+	TSharedPtr<SWidget> GetThumbnailOverlay(const FAssetData& AssetData) const override;
 	// End of FAssetTypeActions_Base implementation
 
 	/** */
