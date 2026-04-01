@@ -26,11 +26,13 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 	bThumbnailLock = true;
 
 	const bool bHasThumbnailMetaData = GetHasThumbnailMetaData(Object);
-	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
+
+	bool bCanVisualize = false;
+	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object, bCanVisualize);
 
 	// If this asset has "HasThumbnail" tag, but no correct asset to visualize is available,
 	// clear the current custom thumbnail and remove the tag.
-	if (bHasThumbnailMetaData && (AssetToVisualize == nullptr))
+	if (bHasThumbnailMetaData && (bCanVisualize == false))
 	{
 		AssetViewUtils::ClearCustomThumbnails({ FAssetData(Object) });
 		SetHasThumbnailMetaData(Object, false);
@@ -38,13 +40,13 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 	// If there is an asset to visualize available, but no "HasThumbnail" tag - add this tag.
 	// Thumbnail will be set in the next phase.
 	// The "HasThumbnail" tag prevents from Capturing Custom Thumbnail if a custom one from plugin is set.
-	else if ((bHasThumbnailMetaData == false) && (AssetToVisualize != nullptr))
+	else if ((bHasThumbnailMetaData == false) && (bCanVisualize))
 	{
 		SetHasThumbnailMetaData(Object, true);
 	}
 
 	// Store the result now, return true if there is an Asset to Visualize.
-	const bool bResult = (AssetToVisualize != nullptr);
+	const bool bResult = bCanVisualize;
 
 	// Release the lock
 	bThumbnailLock = false;
@@ -53,45 +55,63 @@ bool UDATRenderer::CanVisualizeAsset(UObject* Object)
 	return bResult;
 }
 
-UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object) const
+UE_DISABLE_OPTIMIZATION
+
+UObject* UDATRenderer::GetAssetToVisualizeFromObject(const UObject* Object, bool& bCanVisualize) const
 {
 	UObject* AssetToVisualize = nullptr;
+	bCanVisualize = false;
 
 	// Try to get a UObject from the interface.
 	if (Object->Implements<UDataAssetWithThumbnail>())
 	{
 		AssetToVisualize = IDataAssetWithThumbnail::Execute_GetAssetToRender(Object);
+		if (AssetToVisualize)
+		{
+			bCanVisualize = true;
+			return AssetToVisualize;
+		}
 	}
 
 	// If failed, try to get a UObject directly from the asset.
 	if (AssetToVisualize == nullptr)
 	{
-		AssetToVisualize = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FObjectProperty, UObject*>(Object);
+		AssetToVisualize = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FObjectProperty, UObject*>(Object, bCanVisualize);
 	}
 	
 	if (AssetToVisualize == nullptr)
 	{
 		// If failed, try to get a Soft Object directly from the asset.
-		FSoftObjectPtr AssetToVisualizeSoft = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FSoftObjectProperty, FSoftObjectPtr>(Object);
+		FSoftObjectPtr AssetToVisualizeSoft = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FSoftObjectProperty, FSoftObjectPtr>(Object, bCanVisualize);
 		AssetToVisualize = AssetToVisualizeSoft.LoadSynchronous();
 	}
 
 	if (AssetToVisualize == nullptr)
 	{
 		// If failed, try to get a Slate Brush directly from the asset.
-		FSlateBrush SlateBrush = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FSlateBrush>(Object);
+		FSlateBrush SlateBrush = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FSlateBrush>(Object, bCanVisualize);
 		AssetToVisualize = SlateBrush.GetResourceObject();
+	}
+
+	if (AssetToVisualize == nullptr)
+	{
+		// If failed, try to get a Linear Color.
+		// Can't work with it directly, so if found just return that information.
+		FLinearColor SlateBrush = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FLinearColor>(Object, bCanVisualize);
 	}
 
 	return AssetToVisualize;
 }
+
+UE_ENABLE_OPTIMIZATION
 
 void UDATRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const
 {
 	OutWidth = 256;
 	OutHeight = 256;
 
-	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
+	bool bCanVisualize = false;
+	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object, bCanVisualize);
 	if (AssetToVisualize == nullptr)
 	{
 		return;
@@ -208,15 +228,30 @@ bool UDATRenderer::TryDrawUIMaterialWithSolidBGColor(UObject* Object, FRenderTar
 	return true;
 }
 
+void UDATRenderer::DrawColor(FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height)
+{
+	if (Canvas)
+	{
+		Canvas->DrawTile(0, 0, Width, Height, 0, 0, 1, 1, Color, GWhiteTexture);
+	}
+}
+
 void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
 	// Obtain the actual asset (Texture2D, MaterialInterface, SlateBrush resource object) used to draw the thumbnail.
-	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object);
-	if (AssetToVisualize == nullptr)
+	bool bCanVisualize = false;
+	UObject* AssetToVisualize = GetAssetToVisualizeFromObject(Object, bCanVisualize);
+	if (AssetToVisualize == nullptr && bCanVisualize)
 	{
+		// If there is no asset to visualize, but we can visualize, try to find a color struct property inside the object and use it as a thumbnail.
+		FLinearColor LColor = FDATEditorUtils::FindSupportedThumbnailObjectInObject<FStructProperty, FLinearColor>(Object, bCanVisualize);
+		if (bCanVisualize)
+		{
+			DrawColor(Canvas, LColor, Width, Height);
+		}
 		return;
 	}
-
+	
 	// If the solid color on icons with translucency is enabled, try to draw the asset with the solid background.
 	if (UDATSettings::Get()->SolidBackgroundOnTranslucentIcons(Object->GetClass()))
 	{

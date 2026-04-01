@@ -43,7 +43,7 @@ protected:
 	 * Searches for the object with "Thumbnail" meta data tag inside of the given Object.
 	 * This object will be used to visualize the thumbnail.
 	 */
-	UObject* GetAssetToVisualizeFromObject(const UObject* Object) const;
+	UObject* GetAssetToVisualizeFromObject(const UObject* Object, bool& bCanVisualize) const;
 
 private: 
 
@@ -77,9 +77,13 @@ private:
 	 */
 	bool TryDrawUIMaterialWithSolidBGColor(UObject* Object, class FRenderTarget* Viewport, FLinearColor BGColor, uint32 Width, uint32 Height);
 
+	void DrawColor(class FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height);
+
 	/** Widget renderer required for Material thumbnails custom drawing. */
 	class FWidgetRenderer* WidgetRenderer = nullptr;
 
 	/** Slate Material Brush required for Material thumbnails custom drawing. */
 	struct FSlateMaterialBrush* UIMaterialBrush = nullptr;
+
+	TArray<UTexture2D*> Test;
 };
