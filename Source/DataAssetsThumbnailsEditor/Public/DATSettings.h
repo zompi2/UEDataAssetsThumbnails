@@ -31,6 +31,10 @@ struct FDATGlobalOverride
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bOverrideDefaultIcon"), Category = "Data Assets Thumbnails")
     FSlateBrush DefaultIconBrush;
 
+	// If true, the default icon will be used as a corner icon in the thumbnail
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
+    bool bUseIconAsCornerIcon = false;
+
     // Overriding if the data asset should draw solid background if with transulency (instead of standard checkerboard)
     UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Data Assets Thumbnails")
     bool bSolidBackgroundOnTranslucentIcons = false;

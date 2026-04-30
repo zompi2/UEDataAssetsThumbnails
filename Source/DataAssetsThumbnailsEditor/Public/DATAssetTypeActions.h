@@ -27,4 +27,5 @@ public:
 	TSubclassOf<class UDataAsset> DataAssetClass;
 	FColor DataAssetColor;
 	const FSlateBrush* SlateBrush = nullptr;
+	bool bUseBrushAsCornerIcon = false;
 };

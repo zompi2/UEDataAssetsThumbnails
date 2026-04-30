@@ -29,29 +29,22 @@ const FSlateBrush* FDATAssetTypeActions::GetThumbnailBrush(const FAssetData& InA
 
 TSharedPtr<SWidget> FDATAssetTypeActions::GetThumbnailOverlay(const FAssetData& AssetData) const
 {
-/*
-    // Return a simple Slate image tinted to your color
-    return SNew(SImage)
-        // You can use a built-in white brush and tint it
-        .Image(FAppStyle::GetBrush("WhiteBrush"))
-        .ColorAndOpacity(FSlateColor(DataAssetColor));
-*/
+    if ((bUseBrushAsCornerIcon == false) || (SlateBrush == nullptr))
+    {
+        return nullptr;
+    }
 
     return SNew(SOverlay)
-        + SOverlay::Slot()
+        +SOverlay::Slot()
         .HAlign(HAlign_Left)
         .VAlign(VAlign_Bottom)
-        .Padding(FMargin(4.0f)) // Adds a small gap from the thumbnail edges
+        .Padding(FMargin(4.0f))
         [
-            // SBox forces the SImage to stay exactly this size
             SNew(SBox)
-                .WidthOverride(12.0f)
-                .HeightOverride(12.0f)
+                .WidthOverride(28.f)
+                .HeightOverride(28.f)
                 [
-                    SNew(SImage)
-                        // "WhiteBrush" is a built-in UE5 untextured white square, perfect for tinting
-                        .Image(FAppStyle::GetBrush("WhiteBrush"))
-                        .ColorAndOpacity(FSlateColor(DataAssetColor))
+                    SNew(SImage).Image(SlateBrush)
                 ]
         ];
 }
