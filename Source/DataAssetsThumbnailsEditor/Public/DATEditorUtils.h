@@ -23,7 +23,7 @@ private:
 	/**
 	 * Casts the FProperty into one of the supported FProperty, that stores object that can render thumbnail.
 	 * It can be FObjectProperty or FSoftObjectProperty, that stores UTexture2D or UMaterialInterface.
-	 * It can also be FStructProperty, that stores FSlateBrush or FLinearColor.
+	 * It can also be FStructProperty, that stores FSlateBrush or FColor or FLinearColor.
 	 * When casting to FStructProperty, the ExpectedStructName must be provided, to prevent invalid casting
 	 * in next steps.
 	 */
@@ -123,6 +123,7 @@ private:
 	 *   FObjectProperty - UObject*
 	 *   FSoftObjectProperty - FSoftObjectPtr
 	 *   FStructProperty - FSlateBrush
+	 *   FStructProperty - FColor
 	 *   FStructProperty - FLinearColor
 	 */
 	template<typename T, typename R>
@@ -191,7 +192,7 @@ public:
 	static R FindSupportedThumbnailObjectInObject(const UObject* Object)
 	{
 		static_assert(TSupportedObjectPair<T, R>::Value, "Unsupported Property Type");
-		static_assert(TSupportedColorType<T>::Value == false, "Can't obtain colors like that. Use FindSupportedThumbnailColorInObject instead!");
+		static_assert(TSupportedColorType<R>::Value == false, "Can't obtain colors like that. Use FindSupportedThumbnailColorInObject instead!");
 		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object, TStructName<R>::Name), Object);
 	}
 

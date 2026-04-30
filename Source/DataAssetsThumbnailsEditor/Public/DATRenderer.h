@@ -45,6 +45,11 @@ protected:
 	 */
 	UObject* GetAssetToVisualizeFromObject(const UObject* Object) const;
 
+	/**
+	 * Searches for the color struct with "Thumbnail" meta tag inside.
+	 * This color will be used to visualize the thumbnail.
+	 * Check bOutFoundColor to see if the color struct was found.
+	 */
 	FLinearColor GetColorToVisualizeFromObject(UObject* Object, bool& bOutFoundColor) const;
 
 private: 
@@ -79,14 +84,14 @@ private:
 	 */
 	bool TryDrawUIMaterialWithSolidBGColor(UObject* Object, class FRenderTarget* Viewport, FLinearColor BGColor, uint32 Width, uint32 Height);
 
+	/**
+	 * Draws the given color on the whole thumbnail.
+	 */
 	void DrawColor(class FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height);
-
 
 	/** Widget renderer required for Material thumbnails custom drawing. */
 	class FWidgetRenderer* WidgetRenderer = nullptr;
 
 	/** Slate Material Brush required for Material thumbnails custom drawing. */
 	struct FSlateMaterialBrush* UIMaterialBrush = nullptr;
-
-	TArray<UTexture2D*> Test;
 };
