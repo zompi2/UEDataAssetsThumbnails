@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Damian Nowakowski. All rights reserved.
+// Copyright (c) 2026 Damian Nowakowski. All rights reserved.
 
 #include "DATEditorStyle.h"
 #include "Framework/Application/SlateApplication.h"
