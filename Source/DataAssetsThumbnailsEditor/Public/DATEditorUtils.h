@@ -23,10 +23,12 @@ private:
 	/**
 	 * Casts the FProperty into one of the supported FProperty, that stores object that can render thumbnail.
 	 * It can be FObjectProperty or FSoftObjectProperty, that stores UTexture2D or UMaterialInterface.
-	 * It can also be FStructProperty, that stores FSlateBrush.
+	 * It can also be FStructProperty, that stores FSlateBrush or FLinearColor.
+	 * When casting to FStructProperty, the ExpectedStructName must be provided, to prevent invalid casting
+	 * in next steps.
 	 */
 	template<typename T>
-	static T* CastPropertyToSupportedObjectProperty(FProperty* Property)
+	static T* CastPropertyToSupportedObjectProperty(FProperty* Property, const FName& ExpectedStructName)
 	{
 		static_assert(TSupportedPropertyCast<T>::Value, "Unsupported Property Cast Type");
 
@@ -46,26 +48,20 @@ private:
 		}
 
 		T* ObjectStructProperty = static_cast<T*>(Property);
+		if (ObjectStructProperty == nullptr)
+		{
+			return nullptr;
+		}
 
 		if constexpr (ARE_TYPES_EQUAL(T, FStructProperty))
 		{
-			if (ObjectStructProperty == nullptr)
-			{
-				return nullptr;
-			}
-
-			if (ObjectStructProperty->Struct->IsChildOf(FSlateBrush::StaticStruct()))
+			if (ObjectStructProperty->Struct->GetName() == ExpectedStructName)
 			{
 				return ObjectStructProperty;
 			}
-		}
+		}	
 		else
 		{
-			if (ObjectStructProperty->PropertyClass == nullptr) [[unlikely]]
-			{
-				return nullptr;
-			}
-	
 			if (ObjectStructProperty->PropertyClass->IsChildOf<UTexture2D>())
 			{
 				return ObjectStructProperty;
@@ -84,9 +80,11 @@ private:
 	 * Find the supported FProperty (can be FObjectProperty, FSoftObjectProperty, or FStructProperty)
 	 * inside of the given Object, which supposed to be a DataAsset.
 	 * It searches for FProperties with Thumbnail Metadata Tag. 
+	 * For FStructProperty it requires ExpectedStructName to be provided, to prevent invalid casting in next steps.
+	 * Returns the pointer to the supported object property and sets bFound to true if found.
 	 */
 	template<typename T>
-	static T* FindSupportedThumbnailObjectProperty(const UObject* Object)
+	static T* FindSupportedThumbnailObjectProperty(const UObject* Object, const FName& ExpectedStructName)
 	{
 		static_assert(TSupportedPropertyCast<T>::Value, "Unsupported Property Cast Type");
 
@@ -109,7 +107,7 @@ private:
 				continue;
 			}
 
-			T* ObjectStructProperty = FDATEditorUtils::CastPropertyToSupportedObjectProperty<T>(Property);
+			T* ObjectStructProperty = FDATEditorUtils::CastPropertyToSupportedObjectProperty<T>(Property, ExpectedStructName);
 			if (ObjectStructProperty)
 			{
 				return ObjectStructProperty;
@@ -125,6 +123,7 @@ private:
 	 *   FObjectProperty - UObject*
 	 *   FSoftObjectProperty - FSoftObjectPtr
 	 *   FStructProperty - FSlateBrush
+	 *   FStructProperty - FLinearColor
 	 */
 	template<typename T, typename R>
 	static R GetSupportedObjectFromObjectProperty(T* ObjectOrStructProperty, const UObject* ContainerObject)
@@ -147,19 +146,31 @@ public:
 	 */
 	static bool IsPropertySupported(FProperty* Property)
 	{
-		FObjectProperty* ObjectProperty = CastPropertyToSupportedObjectProperty<FObjectProperty>(Property);
+		FObjectProperty* ObjectProperty = CastPropertyToSupportedObjectProperty<FObjectProperty>(Property, "");
 		if (ObjectProperty)
 		{
 			return true;
 		}
 
-		FSoftObjectProperty* SoftObjectProperty = CastPropertyToSupportedObjectProperty<FSoftObjectProperty>(Property);
+		FSoftObjectProperty* SoftObjectProperty = CastPropertyToSupportedObjectProperty<FSoftObjectProperty>(Property, "");
 		if (SoftObjectProperty)
 		{
 			return true;
 		}
 
-		FStructProperty* StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property);
+		FStructProperty* StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property, TStructName<FSlateBrush>::Name);
+		if (StructProperty)
+		{
+			return true;
+		}
+
+		StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property, TStructName<FColor>::Name);
+		if (StructProperty)
+		{
+			return true;
+		}
+
+		StructProperty = CastPropertyToSupportedObjectProperty<FStructProperty>(Property, TStructName<FLinearColor>::Name);
 		if (StructProperty)
 		{
 			return true;
@@ -170,7 +181,7 @@ public:
 
 	/**
 	 * Finds the object that can be rendered using thumbnail renderer inside of the UObject.
-	 * It searches for UObject*, FSoftObjectPtr or FSlateBrush from the Object.
+	 * It searches for UObject*, FSoftObjectPtr or FSlateBrush or FLinearColor from the Object.
 	 * The only supported pairs are:
 	 *   FObjectProperty - UObject*
 	 *   FSoftObjectProperty - FSoftObjectPtr
@@ -180,8 +191,26 @@ public:
 	static R FindSupportedThumbnailObjectInObject(const UObject* Object)
 	{
 		static_assert(TSupportedObjectPair<T, R>::Value, "Unsupported Property Type");
+		static_assert(TSupportedColorType<T>::Value == false, "Can't obtain colors like that. Use FindSupportedThumbnailColorInObject instead!");
+		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object, TStructName<R>::Name), Object);
+	}
 
-		return GetSupportedObjectFromObjectProperty<T, R>(FindSupportedThumbnailObjectProperty<T>(Object), Object);
+	/**
+	 * Finds the color that can be rendered using thumbnail renderer inside of the UObject.
+	 * It searches for FColor and FLinearColor from the Object.
+	 */
+	template<typename T>
+	static T FindSupportedThumbnailColorInObject(const UObject* Object, bool& bFoundColor)
+	{
+		static_assert(TSupportedColorType<T>::Value, "Unsupported Color Type");
+		FStructProperty* StructProperty = FindSupportedThumbnailObjectProperty<FStructProperty>(Object, TStructName<T>::Name);
+		if (StructProperty)
+		{
+			bFoundColor = true;
+			return GetSupportedObjectFromObjectProperty<FStructProperty, T>(StructProperty, Object);
+		}
+		bFoundColor = false;
+		return T::Black;
 	}
 };
 

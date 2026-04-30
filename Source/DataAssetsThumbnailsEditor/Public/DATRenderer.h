@@ -45,6 +45,8 @@ protected:
 	 */
 	UObject* GetAssetToVisualizeFromObject(const UObject* Object) const;
 
+	FLinearColor GetColorToVisualizeFromObject(UObject* Object, bool& bOutFoundColor) const;
+
 private: 
 
 	/** Used to prevent infinite loop when calling CanVisualizeAsset. */
@@ -77,9 +79,14 @@ private:
 	 */
 	bool TryDrawUIMaterialWithSolidBGColor(UObject* Object, class FRenderTarget* Viewport, FLinearColor BGColor, uint32 Width, uint32 Height);
 
+	void DrawColor(class FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height);
+
+
 	/** Widget renderer required for Material thumbnails custom drawing. */
 	class FWidgetRenderer* WidgetRenderer = nullptr;
 
 	/** Slate Material Brush required for Material thumbnails custom drawing. */
 	struct FSlateMaterialBrush* UIMaterialBrush = nullptr;
+
+	TArray<UTexture2D*> Test;
 };
