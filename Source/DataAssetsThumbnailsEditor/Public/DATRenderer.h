@@ -43,7 +43,9 @@ protected:
 	 * Searches for the object with "Thumbnail" meta data tag inside of the given Object.
 	 * This object will be used to visualize the thumbnail.
 	 */
-	UObject* GetAssetToVisualizeFromObject(const UObject* Object, bool& bCanVisualize) const;
+	UObject* GetAssetToVisualizeFromObject(const UObject* Object) const;
+
+	FLinearColor GetColorToVisualizeFromObject(UObject* Object, bool& bOutFoundColor) const;
 
 private: 
 
@@ -78,6 +80,7 @@ private:
 	bool TryDrawUIMaterialWithSolidBGColor(UObject* Object, class FRenderTarget* Viewport, FLinearColor BGColor, uint32 Width, uint32 Height);
 
 	void DrawColor(class FCanvas* Canvas, FLinearColor Color, uint32 Width, uint32 Height);
+
 
 	/** Widget renderer required for Material thumbnails custom drawing. */
 	class FWidgetRenderer* WidgetRenderer = nullptr;

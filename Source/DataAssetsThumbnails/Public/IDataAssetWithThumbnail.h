@@ -19,4 +19,10 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent)
 	UObject* GetAssetToRender() const;
+
+	UFUNCTION(BlueprintNativeEvent)
+	bool VisualizeWithSolidColor() const;
+
+	UFUNCTION(BlueprintNativeEvent)
+	FLinearColor GetColorToRender() const;
 };
