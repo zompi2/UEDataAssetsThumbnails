@@ -26,3 +26,25 @@ const FSlateBrush* FDATAssetTypeActions::GetThumbnailBrush(const FAssetData& InA
 {
 	return SlateBrush;
 }
+
+TSharedPtr<SWidget> FDATAssetTypeActions::GetThumbnailOverlay(const FAssetData& AssetData) const
+{
+    if ((bUseBrushAsCornerIcon == false) || (SlateBrush == nullptr))
+    {
+        return nullptr;
+    }
+
+    return SNew(SOverlay)
+        +SOverlay::Slot()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Bottom)
+        .Padding(FMargin(4.0f))
+        [
+            SNew(SBox)
+                .WidthOverride(28.f)
+                .HeightOverride(28.f)
+                [
+                    SNew(SImage).Image(SlateBrush)
+                ]
+        ];
+}

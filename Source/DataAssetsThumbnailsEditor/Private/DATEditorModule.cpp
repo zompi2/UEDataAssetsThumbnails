@@ -130,6 +130,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
             {
                 CreatedAssetTypeActions[OverrideKey]->DataAssetColor = OverrideValue.GetColor();
                 CreatedAssetTypeActions[OverrideKey]->SlateBrush = OverrideValue.GetDefaultIconBrush();
+                CreatedAssetTypeActions[OverrideKey]->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
             }
             // Otherwise add new AssetTypeAction and register it.
             else
@@ -138,6 +139,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
                 NewAction->DataAssetClass = OverrideKey;
                 NewAction->DataAssetColor = OverrideValue.GetColor();
                 NewAction->SlateBrush = OverrideValue.GetDefaultIconBrush();
+                NewAction->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
 
                 CreatedAssetTypeActions.Add(GlobalOverride.Key, NewAction);
                 AssetTools.RegisterAssetTypeActions(NewAction);
