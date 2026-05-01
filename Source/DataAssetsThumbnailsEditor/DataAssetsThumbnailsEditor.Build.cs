@@ -38,8 +38,9 @@ public class DataAssetsThumbnailsEditor : ModuleRules
 				"AssetRegistry",
 				"Settings",
 				"RenderCore",
-				"UMG"
-			}
+				"UMG",
+                "AssetDefinition"
+            }
 		);
 	}
 }

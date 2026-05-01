@@ -8,7 +8,7 @@
 /**
  * Core module of the DAT (Data Asset Thumbnails) plugin.
  */
-class DATAASSETSTHUMBNAILSEDITOR_API FDATEditorModule : public IModuleInterface
+class DATAASSETSTHUMBNAILSEDITOR_API FDATEditorModule : public IModuleInterface, public FGCObject
 {
 
 public:
@@ -18,6 +18,11 @@ public:
 	 * and everytime when the plugins settings has changed.
 	 */
 	void RefreshAssetTypeActions();
+
+	// Begin of FGCObject implementation
+	void AddReferencedObjects(FReferenceCollector& Collector) override;
+	FString GetReferencerName() const override;
+	// End of FGCObject implementation
 
 protected:
 
@@ -46,6 +51,6 @@ private:
 	// Delegate handle for registering Variable Customization (HasThumbnail checkbox in details panel).
 	FDelegateHandle OnGetVariableCustomizationInstanceDelegateHandle;
 	
-	// Map of AssetTypeActions registered for specific data assets.
-	TMap<TSubclassOf<class UDataAsset>, TSharedRef<class FDATAssetTypeActions>> CreatedAssetTypeActions;
+	// Map of AssetDefinitions registered for specific data assets.
+	TMap<TSubclassOf<class UDataAsset>, TObjectPtr<class UDATAssetDefinition>> CreatedAssetDefinitions;
 };

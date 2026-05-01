@@ -6,7 +6,7 @@
 #include "DATRenderer.h"
 #include "DATCustomDetails.h"
 #include "DATSettings.h"
-#include "DATAssetTypeActions.h"
+#include "DATAssetDefinition.h"
 
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "BlueprintEditorModule.h"
@@ -15,7 +15,7 @@
 #include "FileHelpers.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "ISettingsModule.h"
-#include "AssetToolsModule.h"
+#include "AssetDefinitionRegistry.h"
 
 IMPLEMENT_MODULE(FDATEditorModule, DataAssetsThumbnailsEditor);
 
@@ -53,15 +53,14 @@ void FDATEditorModule::StartupModule()
 void FDATEditorModule::ShutdownModule()
 {
     // Unregister AssetActiontypes.
-    if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+    if (UAssetDefinitionRegistry* Registry = UAssetDefinitionRegistry::Get())
     {
-        IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-        for (auto RegisteredAssetType : CreatedAssetTypeActions)
+        for (auto RegisteredAssetType : CreatedAssetDefinitions)
         {
-            AssetTools.UnregisterAssetTypeActions(RegisteredAssetType.Value);
+            Registry->UnregisterAssetDefinition(RegisteredAssetType.Value);
         }
     }
-    CreatedAssetTypeActions.Empty();
+    CreatedAssetDefinitions.Empty();
 
     // Unregister plugin settings.
     if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
@@ -92,6 +91,16 @@ void FDATEditorModule::ShutdownModule()
     FDATEditorStyle::Shutdown();
 }
 
+void FDATEditorModule::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    Collector.AddReferencedObjects(CreatedAssetDefinitions);
+}
+
+FString FDATEditorModule::GetReferencerName() const
+{
+	return TEXT("FDATEditorModule");
+}
+
 /**
  * Refreshes AssetTypeActions (which controls icon color and default icon) on startup
  * and everytime when the plugins settings has changed.
@@ -104,10 +113,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
     {
         return;
     }
-
-    // Obtain AssetTools to register or uregister AssetTypeActions.
-    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    
+   
     // Save the types of DataAssets that should have custom AssetTypeActions 
     // (used later to diff and unregister the old ones).
     TSet<TSubclassOf<UDataAsset>> DesiredClasses;
@@ -125,32 +131,35 @@ void FDATEditorModule::RefreshAssetTypeActions()
             // This data asset class is overriden.
             DesiredClasses.Add(OverrideKey);
 
-            // If the AssetTypeAction already exists just change it's settings.
-            if (CreatedAssetTypeActions.Contains(OverrideKey))
+            // If the AssetDefinition already exists just change it's settings.
+            if (CreatedAssetDefinitions.Contains(OverrideKey))
             {
-                CreatedAssetTypeActions[OverrideKey]->DataAssetColor = OverrideValue.GetColor();
-                CreatedAssetTypeActions[OverrideKey]->SlateBrush = OverrideValue.GetDefaultIconBrush();
-                CreatedAssetTypeActions[OverrideKey]->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
+                CreatedAssetDefinitions[OverrideKey]->DataAssetColor = OverrideValue.GetColor();
+                CreatedAssetDefinitions[OverrideKey]->SlateBrush = OverrideValue.GetDefaultIconBrush();
+                CreatedAssetDefinitions[OverrideKey]->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
             }
-            // Otherwise add new AssetTypeAction and register it.
+            // Otherwise add new AssetDefinition and register it.
             else
             {
-                TSharedRef<FDATAssetTypeActions> NewAction = MakeShared<FDATAssetTypeActions>();
-                NewAction->DataAssetClass = OverrideKey;
-                NewAction->DataAssetColor = OverrideValue.GetColor();
-                NewAction->SlateBrush = OverrideValue.GetDefaultIconBrush();
-                NewAction->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
+                UDATAssetDefinition* NewDefinition = NewObject<UDATAssetDefinition>();
+                NewDefinition->DataAssetClass = OverrideKey;
+                NewDefinition->DataAssetColor = OverrideValue.GetColor();
+                NewDefinition->SlateBrush = OverrideValue.GetDefaultIconBrush();
+                NewDefinition->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
 
-                CreatedAssetTypeActions.Add(GlobalOverride.Key, NewAction);
-                AssetTools.RegisterAssetTypeActions(NewAction);
+                CreatedAssetDefinitions.Add(GlobalOverride.Key, NewDefinition);
+                if (UAssetDefinitionRegistry* Registry = UAssetDefinitionRegistry::Get())
+                {
+                    Registry->RegisterAssetDefinition(NewDefinition);
+                }
             }
         }
     }
 
-    // Diff DesiredClasses with CreatedAssetTypeActions to get data asset classess which should not
+    // Diff DesiredClasses with CreatedAssetDefinitions to get data asset classess which should not
     // have overriden AssetTypeAction.
     TArray<TSubclassOf<UDataAsset>> ClassesToUnregister;
-    for (auto& AssetActionType : CreatedAssetTypeActions)
+    for (auto& AssetActionType : CreatedAssetDefinitions)
     {
         if (DesiredClasses.Contains(AssetActionType.Key) == false)
         {
@@ -158,11 +167,14 @@ void FDATEditorModule::RefreshAssetTypeActions()
         }
     }
 
-    // Unregister unwanted AssetTypeActions.
+    // Unregister unwanted AssetDefinitions.
     for (TSubclassOf<UDataAsset> ClassToUnregister : ClassesToUnregister)
     {
-        AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[ClassToUnregister]);
-        CreatedAssetTypeActions.Remove(ClassToUnregister);
+        if (UAssetDefinitionRegistry* Registry = UAssetDefinitionRegistry::Get())
+        {
+            Registry->UnregisterAssetDefinition(CreatedAssetDefinitions[ClassToUnregister]);
+        }
+        CreatedAssetDefinitions.Remove(ClassToUnregister);
     }
 }
 
