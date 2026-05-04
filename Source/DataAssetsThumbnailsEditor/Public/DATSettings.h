@@ -45,7 +45,7 @@ struct FDATGlobalOverride
     // Is there any type of override that changes Asset Type Action Data
     bool OverridesAnyAssetTypeActionData() const
     {
-        return bOverrideColor || bOverrideDefaultIcon;
+        return bOverrideColor || bOverrideDefaultIcon || bUseIconAsCornerIcon;
     }
 
     // Returns the Data Asset color for this asset
@@ -99,7 +99,7 @@ public:
     /**
      * Checks this asset background color to be rendered if icon is transparent.
      */
-    FLinearColor GetAssetBGColor(TSubclassOf<class UDataAsset> AssetClass) const;
+    FLinearColor GetAssetSolidBGColor(TSubclassOf<class UDataAsset> AssetClass) const;
 
 protected:
 

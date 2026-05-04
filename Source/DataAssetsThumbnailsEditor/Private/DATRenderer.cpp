@@ -275,7 +275,7 @@ void UDATRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 
 	// If the solid color on icons with translucency is enabled, try to draw the asset with the solid background.
 	if (UDATSettings::Get()->SolidBackgroundOnTranslucentIcons(Object->GetClass()))
 	{
-		const FLinearColor BGColor = UDATSettings::Get()->GetAssetBGColor(Object->GetClass());
+		const FLinearColor BGColor = UDATSettings::Get()->GetAssetSolidBGColor(Object->GetClass());
 
 		// For Textures.
 		if (TryDrawUITextureWithSolidBGColor(AssetToVisualize, Canvas, BGColor, Width, Height))
