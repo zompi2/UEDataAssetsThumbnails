@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Templates/AreTypesEqual.h"
 #include "Templates/UnrealTypeTraits.h"
 
 class DATAASSETSTHUMBNAILS_API FDATUtils
@@ -15,7 +14,8 @@ public:
 	{
 		static constexpr bool IsTexture2D = TIsDerivedFrom<typename TRemovePointer<T>::Type, UTexture2D>::IsDerived;
 		static constexpr bool IsMaterialInterface = TIsDerivedFrom<typename TRemovePointer<T>::Type, UMaterialInterface>::IsDerived;
-		static constexpr bool IsSlateBrush = ARE_TYPES_EQUAL(T, FSlateBrush);
+
+		static constexpr bool IsSlateBrush = std::is_same<T, FSlateBrush>::value;
 
 		static_assert(IsTexture2D || IsMaterialInterface || IsSlateBrush, "[FDATUtils::GetRenderObject] Invalid object type. Can be either UTexture2D, UMaterialInterface or FSlateBrush!");
 	
