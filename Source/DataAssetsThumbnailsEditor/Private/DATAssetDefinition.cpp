@@ -2,7 +2,7 @@
 
 #include "DATAssetDefinition.h"
 
-#if (ENGINE_MINOR_VERSION >= 7)
+#if (ENGINE_MINOR_VERSION >= 6)
 #include "AssetDefinitionAssetInfo.h"
 #endif
 
@@ -26,21 +26,24 @@ const FSlateBrush* UDATAssetDefinition::GetThumbnailBrush(const FAssetData& InAs
 	return SlateBrush;
 }
 
-#if (ENGINE_MINOR_VERSION >= 7)
+#if (ENGINE_MINOR_VERSION >= 6)
 void UDATAssetDefinition::GetAssetStatusInfo(const TSharedPtr<IAssetStatusInfoProvider>& InAssetStatusInfoProvider, TArray<FAssetDisplayInfo>& OutStatusInfo) const
 {
 	Super::GetAssetStatusInfo(InAssetStatusInfoProvider, OutStatusInfo);
 
-	if ((bUseBrushAsCornerIcon) && (SlateBrush))
+	if ((bUseBrushAsCornerIcon == false) || (SlateBrush == nullptr))
 	{
-		FAssetDisplayInfo NewStatus;
-		NewStatus.StatusIcon = SlateBrush;
-		NewStatus.StatusDescription = FText::FromString(DataAssetClass.GetAssetName());
-		NewStatus.IsVisible = EVisibility::HitTestInvisible;
-		OutStatusInfo.Add(MoveTemp(NewStatus));
+		return;
 	}
+
+	FAssetDisplayInfo NewStatus;
+	NewStatus.StatusIcon = SlateBrush;
+	NewStatus.StatusDescription = FText::FromString(DataAssetClass.GetAssetName());
+	NewStatus.Priority = FAssetStatusPriority(EStatusSeverity::Info, 0);
+	NewStatus.IsVisible = EVisibility::Visible;
+	OutStatusInfo.Add(MoveTemp(NewStatus));
 }
-#elif (ENGINE_MINOR_VERSION <= 5)
+#else
 TSharedPtr<SWidget> UDATAssetDefinition::GetThumbnailOverlay(const FAssetData& AssetData) const
 {
 	if ((bUseBrushAsCornerIcon == false) || (SlateBrush == nullptr))

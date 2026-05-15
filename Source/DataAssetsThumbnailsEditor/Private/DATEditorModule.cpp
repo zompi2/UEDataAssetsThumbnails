@@ -138,9 +138,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
             {
                 CreatedAssetDefinitions[OverrideKey]->DataAssetColor = OverrideValue.GetColor();
                 CreatedAssetDefinitions[OverrideKey]->SlateBrush = OverrideValue.GetDefaultIconBrush();
-#if (ENGINE_MINOR_VERSION != 6)
                 CreatedAssetDefinitions[OverrideKey]->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
-#endif
             }
             // Otherwise add new AssetDefinition and register it.
             else
@@ -149,9 +147,7 @@ void FDATEditorModule::RefreshAssetTypeActions()
                 NewDefinition->DataAssetClass = OverrideKey;
                 NewDefinition->DataAssetColor = OverrideValue.GetColor();
                 NewDefinition->SlateBrush = OverrideValue.GetDefaultIconBrush();
-#if (ENGINE_MINOR_VERSION != 6)
                 NewDefinition->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
-#endif
                 CreatedAssetDefinitions.Add(GlobalOverride.Key, NewDefinition);
                 if (UAssetDefinitionRegistry* Registry = UAssetDefinitionRegistry::Get())
                 {
