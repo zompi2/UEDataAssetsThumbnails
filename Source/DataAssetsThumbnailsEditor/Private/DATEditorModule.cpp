@@ -79,6 +79,7 @@ void FDATEditorModule::ShutdownModule()
     }
 
     // Unregister custom thumbnail renderer.
+#if ENGINE_MINOR_VERSION < 8
     if (UThumbnailManager* ThumbnailManager = UThumbnailManager::TryGet())
     {
         if (IsValid(ThumbnailManager) && (ThumbnailManager->HasAnyFlags(RF_BeginDestroyed | RF_FinishDestroyed) == false))
@@ -86,6 +87,7 @@ void FDATEditorModule::ShutdownModule()
             ThumbnailManager->UnregisterCustomRenderer(UDataAsset::StaticClass());
         }
     }
+#endif
 
     // Unregister Styles.
     FDATEditorStyle::Shutdown();
@@ -146,7 +148,6 @@ void FDATEditorModule::RefreshAssetTypeActions()
                 NewDefinition->DataAssetColor = OverrideValue.GetColor();
                 NewDefinition->SlateBrush = OverrideValue.GetDefaultIconBrush();
                 NewDefinition->bUseBrushAsCornerIcon = OverrideValue.bUseIconAsCornerIcon;
-
                 CreatedAssetDefinitions.Add(GlobalOverride.Key, NewDefinition);
                 if (UAssetDefinitionRegistry* Registry = UAssetDefinitionRegistry::Get())
                 {

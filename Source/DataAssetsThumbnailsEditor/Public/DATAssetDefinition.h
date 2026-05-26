@@ -19,7 +19,7 @@ public:
 	const FSlateBrush* GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override;
 
 #if (ENGINE_MINOR_VERSION >= 6)
-	bool GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const override;
+	void GetAssetStatusInfo(const TSharedPtr<IAssetStatusInfoProvider>& InAssetStatusInfoProvider, TArray<FAssetDisplayInfo>& OutStatusInfo) const override;
 #else
 	TSharedPtr<SWidget> GetThumbnailOverlay(const FAssetData& AssetData) const override;
 #endif

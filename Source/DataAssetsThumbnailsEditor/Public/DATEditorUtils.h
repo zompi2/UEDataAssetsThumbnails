@@ -11,7 +11,6 @@
 #include "DATTypes.h"
 #include "IDataAssetWithThumbnail.h"
 #include "UObject/UnrealType.h"
-#include "Templates/AreTypesEqual.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -53,7 +52,7 @@ private:
 			return nullptr;
 		}
 
-		if constexpr (ARE_TYPES_EQUAL(T, FStructProperty))
+		if constexpr (std::is_same<T, FStructProperty>::value)
 		{
 			if (ObjectStructProperty->Struct->GetName() == ExpectedStructName)
 			{

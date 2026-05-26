@@ -2,6 +2,10 @@
 
 #include "DATAssetDefinition.h"
 
+#if (ENGINE_MINOR_VERSION >= 6)
+#include "AssetDefinitionAssetInfo.h"
+#endif
+
 FText UDATAssetDefinition::GetAssetDisplayName() const
 {
 	return NSLOCTEXT("AssetTypeActions", "AssetTypeActions_DataAsset", "Data Asset");
@@ -23,29 +27,21 @@ const FSlateBrush* UDATAssetDefinition::GetThumbnailBrush(const FAssetData& InAs
 }
 
 #if (ENGINE_MINOR_VERSION >= 6)
-bool UDATAssetDefinition::GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const
+void UDATAssetDefinition::GetAssetStatusInfo(const TSharedPtr<IAssetStatusInfoProvider>& InAssetStatusInfoProvider, TArray<FAssetDisplayInfo>& OutStatusInfo) const
 {
+	Super::GetAssetStatusInfo(InAssetStatusInfoProvider, OutStatusInfo);
+
 	if ((bUseBrushAsCornerIcon == false) || (SlateBrush == nullptr))
 	{
-		OutActionOverlayInfo.ActionImageWidget = nullptr;
-		return false;
+		return;
 	}
 
-	OutActionOverlayInfo.ActionImageWidget = SNew(SImage).Image(SlateBrush);
-
-	auto OnClickedLambda = [this, InAssetData]() -> FReply
-	{
-		FAssetOpenArgs OpenArgs;
-		OpenArgs.OpenMethod = EAssetOpenMethod::Edit;
-		OpenArgs.Assets = { InAssetData };
-		OpenAssets(OpenArgs);
-		return FReply::Handled();
-	};
-
-	OutActionOverlayInfo.ActionButtonArgs = SButton::FArguments()
-		.OnClicked_Lambda(OnClickedLambda);
-
-	return true;
+	FAssetDisplayInfo NewStatus;
+	NewStatus.StatusIcon = SlateBrush;
+	NewStatus.StatusDescription = FText::FromString(DataAssetClass.GetAssetName());
+	NewStatus.Priority = FAssetStatusPriority(EStatusSeverity::Info, 0);
+	NewStatus.IsVisible = EVisibility::Visible;
+	OutStatusInfo.Add(MoveTemp(NewStatus));
 }
 #else
 TSharedPtr<SWidget> UDATAssetDefinition::GetThumbnailOverlay(const FAssetData& AssetData) const
@@ -58,7 +54,7 @@ TSharedPtr<SWidget> UDATAssetDefinition::GetThumbnailOverlay(const FAssetData& A
 	return SNew(SOverlay)
 		+ SOverlay::Slot()
 		.HAlign(HAlign_Left)
-		.VAlign(VAlign_Top)
+		.VAlign(VAlign_Bottom)
 		.Padding(FMargin(4.0f))
 		[
 			SNew(SBox)
