@@ -16,7 +16,7 @@ https://www.youtube.com/watch?v=qIrqWKTJ_nE
 # Plugin prebuilt binaries
 
 If you don't want to build the plugin from the source you can get the prebuilt version from Fab:  
-https://www.fab.com/listings/c7a13871-0671-45d5-971c-2f5b3d53d3c0
+https://www.fab.com/listings/239dd3f5-602e-4453-b161-c06191659335
 
 # Building the Plugin
 
