@@ -1,0 +1,28 @@
+1.2.2 - 26.05.2026
+* Using AssetStatusInfo instead of ThumbnailActionOverlay to display asset type icon for the UE5.6 and newer.
+* Asset type icons are displayed at the bottom left corner instead of the top left corner now.
+* Fixed compilation error for UE5.8.
+
+1.2.1 - 04.05.2026
+* Fixed the SolidBackgroundOnTranslucentIcons setting. The global setting is applied to every icon now.
+
+1.2.0 - 01.05.2026
+* Allow to set FColor and FLinearColor to be an Data Asset thumbnail
+* Data Asset type default icon can be displayed in the top left corner of the Data Asset icon
+* Started using Asset Definitions instead of Asset Action Types, to fix deprecations in the new Engine versions
+
+1.1.2 - 24.03.2026
+* Removed InlineEditConditionToggle, because it has broken saving properties into config (https://issues.unrealengine.com/issue/UE-264640)
+
+1.1.1 - 01.11.2025
+* Added icons for content browser context options
+* Used InlineEditConditionToggle in settings for better visuals
+
+1.1.0 - 31.10.2025
+* Added an option to use a solid color instead of the checkerboard for icons with translucency
+
+1.0.1 - 14.05.2025
+* Updates required for UE5.6
+
+1.0.0 - 19.03.2025
+* Plugin has been released!
